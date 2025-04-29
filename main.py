@@ -1,6 +1,6 @@
 import pygame
 from cenario.rua import Rua
-from Personagens.Personagem import Personagem
+from Personagens.Personagem import Personagem1
 
 def main():
     pygame.init()
@@ -10,7 +10,11 @@ def main():
     
     cor_fundo = (165, 219, 142)
     rua = Rua(tela_largura, tela_altura)
-    personagem = Personagem(tela_largura // 2, tela_altura  //2)  # Posição inicial
+    personagem1 = Personagem1(tela_largura // 2, tela_altura // 2)#posição inicial
+    
+    grupo_personagens = pygame.sprite.Group(personagem1)
+    grupo_personagens.add(personagem1)
+
 
     clock = pygame.time.Clock()
     
@@ -26,13 +30,13 @@ def main():
 
         
         rua.atualizar(velocidade)
-        personagem.mover(teclas)
+        grupo_personagens.update(teclas)
 
         
         display.fill(cor_fundo)
         rua.desenhar(display)
-        personagem.desenhar(display)
-
+        grupo_personagens.draw(display)
+        
         pygame.display.flip()
         
         clock.tick(60) 
