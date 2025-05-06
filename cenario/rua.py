@@ -35,6 +35,3 @@ class Rua:
     def desenhar(self, tela):
         if self.visible:
             tela.blit(self.imagem, (0, self.y_pos))
-            pos_y_rua = self.rua.y_pos
-            pos_y_carro = pos_y_rua + (self.rua.altura // 2) - (self.altura // 2) + self.y_offset
-            tela.blit(self.imagem, (self.x, pos_y_carro))
