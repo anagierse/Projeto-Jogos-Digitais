@@ -4,7 +4,7 @@ import random
 class Obstaculo(pygame.sprite.Sprite):
     def __init__(self, tipo, x, y):
         super().__init__()
-        self.tipo = tipo  # 'poste' ou 'buraco'
+        self.tipo = tipo  
         self.velocidade = 3
 
         if tipo == 'poste':

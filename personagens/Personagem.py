@@ -11,13 +11,13 @@ class Personagem1(pygame.sprite.Sprite):
         self.velocidade = 5
 
     def update(self, teclas):
-        if teclas[pygame.K_LEFT]:
+        if teclas[pygame.K_LEFT] or teclas[pygame.K_a]:
             self.rect.x -= self.velocidade
-        if teclas[pygame.K_RIGHT]:
+        if teclas[pygame.K_RIGHT] or teclas[pygame.K_d]:
             self.rect.x += self.velocidade
-        if teclas[pygame.K_UP]:
+        if teclas[pygame.K_UP] or teclas[pygame.K_w]:
             self.rect.y -= self.velocidade
-        if teclas[pygame.K_DOWN]:
+        if teclas[pygame.K_DOWN] or teclas[pygame.K_s]:
             self.rect.y += self.velocidade
 
     def desenhar(self, display):
