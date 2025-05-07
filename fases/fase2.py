@@ -1,7 +1,7 @@
 import pygame
 import random
 from cenario.rua import Rua
-from personagens.Personagem import Personagem1
+from personagens.Personagem import Personagem2
 from cenario.obstaculos import Obstaculo
 
 def executar(tela):
@@ -12,8 +12,8 @@ def executar(tela):
     }
     
     rua = Rua(800, 600)
-    personagem = Personagem1(400, 300)
-    grupo_personagens = pygame.sprite.Group(personagem)
+    personagem2 = Personagem2(400, 300) # posição inicial
+    grupo_personagens = pygame.sprite.Group(personagem2)
     grupo_obstaculos = pygame.sprite.Group()
     
     clock = pygame.time.Clock()
