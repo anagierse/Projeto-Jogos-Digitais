@@ -4,6 +4,7 @@ from Personagens.Personagem import Personagem1
 
 def main():
     pygame.init()
+<<<<<<< Updated upstream
     
     tela_largura, tela_altura = 800, 600
     display = pygame.display.set_mode((tela_largura, tela_altura))
@@ -16,6 +17,10 @@ def main():
     grupo_personagens.add(personagem1)
 
 
+=======
+    tela = pygame.display.set_mode((800,600))
+    pygame.display.set_caption("The Life Snakes")
+>>>>>>> Stashed changes
     clock = pygame.time.Clock()
     
     velocidade = 3  
