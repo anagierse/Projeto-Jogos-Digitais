@@ -13,6 +13,8 @@ def executar(tela):
     
     rua = Rua(800, 600)
     personagem = Personagem1(400, 300)
+    vilao = Vilao(600, 400)
+
     grupo_personagens = pygame.sprite.Group(personagem)
     grupo_obstaculos = pygame.sprite.Group()
     
@@ -40,11 +42,16 @@ def executar(tela):
         rua.atualizar(config["velocidade"])
         grupo_personagens.update(teclas)
         grupo_obstaculos.update()
+        vilao.update(personagem1) 
+
 
         tela.fill(config["cor_fundo"])
         rua.desenhar(tela)
         grupo_obstaculos.draw(tela)
         grupo_personagens.draw(tela)
+
+        if vilao.rect.colliderect(personagem1.rect):
+                pygame.quit()
         
         pygame.display.flip()
         clock.tick(60)
