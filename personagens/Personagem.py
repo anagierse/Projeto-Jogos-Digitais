@@ -49,7 +49,7 @@ class Personagem1(PersonagemBase):
             "baixo": [pygame.K_s, pygame.K_DOWN]
         }
         tamanho = (100, 120)
-        super().__init__('personagens/imagens/personagemCrianca.png', x, y, teclas_controle, tamanho)
+        super().__init__('personagens/imagens/personagemcrianca.png', x, y, teclas_controle, tamanho)
 
 class Personagem2(PersonagemBase):
     def __init__(self, x, y):
@@ -60,7 +60,7 @@ class Personagem2(PersonagemBase):
             "baixo": [pygame.K_s, pygame.K_DOWN]
         }
         tamanho = (150, 150)
-        super().__init__('personagens/imagens/personagemAdolescente.png', x, y, teclas_controle, tamanho)
+        super().__init__('personagens/imagens/personagemadolescente.png', x, y, teclas_controle, tamanho)
 
 class Vilao(pygame.sprite.Sprite):
     def __init__(self, x, y):
