@@ -1,7 +1,7 @@
 import pygame
 import random
 from cenario.rua import Rua
-from personagens.Personagem import Personagem1
+from personagens.Personagem import Personagem1, Vilao
 from cenario.obstaculos import Obstaculo
 
 def executar(tela):
