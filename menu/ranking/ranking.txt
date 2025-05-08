@@ -1,0 +1,1 @@
+Fulano,1500;João,1200;Maria,800;Ana,2000
