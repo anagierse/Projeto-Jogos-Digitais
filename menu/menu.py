@@ -5,7 +5,7 @@ class Menu:
         self.tela = tela
         self.fonte = pygame.font.SysFont(None, 55)
         self.fonte_pequena = pygame.font.SysFont(None, 35)
-        self.opcoes_principal = ["Jogar", "Sobre o Jogo", "Sair"]
+        self.opcoes_principal = ["Jogar", "Sobre o Jogo", "Sair", "Ranking"]
         self.opcoes_fases = ["Fase 1", "Fase 2", "Fase 3", "Voltar"]
         self.estado = "principal"
         self.selecionado = 0
