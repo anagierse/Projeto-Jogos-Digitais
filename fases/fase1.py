@@ -16,6 +16,7 @@ def executar(tela):
     vilao = Vilao(600, 400)
 
     grupo_personagens = pygame.sprite.Group(personagem)
+    grupo_viloes = pygame.sprite.Group(vilao)
     grupo_obstaculos = pygame.sprite.Group()
     
     clock = pygame.time.Clock()
@@ -42,16 +43,17 @@ def executar(tela):
         rua.atualizar(config["velocidade"])
         grupo_personagens.update(teclas)
         grupo_obstaculos.update()
-        vilao.update(personagem1) 
+        vilao.update(personagem) 
 
 
         tela.fill(config["cor_fundo"])
         rua.desenhar(tela)
         grupo_obstaculos.draw(tela)
         grupo_personagens.draw(tela)
+        vilao.desenhar(tela) 
 
-        if vilao.rect.colliderect(personagem1.rect):
-                pygame.quit()
+        if vilao.rect.colliderect(personagem.rect):
+                return False
         
         pygame.display.flip()
         clock.tick(60)
