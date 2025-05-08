@@ -48,8 +48,8 @@ class Personagem1(PersonagemBase):
             "cima": [pygame.K_w, pygame.K_UP],
             "baixo": [pygame.K_s, pygame.K_DOWN]
         }
-        tamanho = (100, 120)
-        super().__init__('personagens/imagens/personagemcrianca.png', x, y, teclas_controle, tamanho)
+        tamanho = (110, 120)
+        super().__init__('personagens/imagens/personagemcriança.png', x, y, teclas_controle, tamanho)
 
 class Personagem2(PersonagemBase):
     def __init__(self, x, y):

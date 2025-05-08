@@ -52,8 +52,10 @@ def executar(tela):
         grupo_personagens.draw(tela)
         vilao.desenhar(tela) 
 
-        if vilao.rect.colliderect(personagem.rect):
-                return False
+        zona_colisao = personagem.rect.inflate(-50, -50)  # diminui o retangulo, mantendo o centro o mesmo.
+
+        if vilao.rect.colliderect(zona_colisao):
+            return False
         
         pygame.display.flip()
         clock.tick(60)

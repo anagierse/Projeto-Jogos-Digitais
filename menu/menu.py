@@ -11,6 +11,9 @@ class Menu:
         self.selecionado = 0
         self.botoes = []
         
+        self.imagem_fundo = pygame.image.load("menu/imagens/fundomenu.png").convert()
+        self.imagem_fundo = pygame.transform.scale(self.imagem_fundo, self.tela.get_size())
+        
     def executar(self):
         while True:
             self.criar_botoes()
@@ -57,7 +60,7 @@ class Menu:
         
         for i, opcao in enumerate(opcoes):
             texto = self.fonte.render(opcao, True, (255, 255, 255))
-            rect = texto.get_rect(center=(largura//2, altura//2 + i*60))
+            rect = texto.get_rect(center=(largura//2, altura//2 - 140 + i*60))
             self.botoes.append((texto, rect, opcao))
             
     def navegar_mouse(self, pos):
@@ -71,7 +74,7 @@ class Menu:
         return None
         
     def desenhar(self):
-        self.tela.fill((0, 0, 0))
+        self.tela.blit(self.imagem_fundo, (0, 0))
         
         if self.estado == "sobre":
             texto_titulo = self.fonte.render("Sobre o Jogo", True, (255, 255, 0))
