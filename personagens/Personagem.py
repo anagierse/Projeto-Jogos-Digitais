@@ -61,6 +61,17 @@ class Personagem2(PersonagemBase):
         }
         tamanho = (150, 150)
         super().__init__('personagens/imagens/personagemadolescente.png', x, y, teclas_controle, tamanho)
+        
+class Personagem3(PersonagemBase):
+    def __init__(self, x, y):
+        teclas_controle = {
+            "esquerda": [pygame.K_a, pygame.K_LEFT],
+            "direita": [pygame.K_d, pygame.K_RIGHT],
+            "cima": [pygame.K_w, pygame.K_UP],
+            "baixo": [pygame.K_s, pygame.K_DOWN]
+        }
+        tamanho = (150, 150)
+        super().__init__('personagens/imagens/personagemadulto.png', x, y, teclas_controle, tamanho)
 
 class Vilao(pygame.sprite.Sprite):
     def __init__(self, x, y):
