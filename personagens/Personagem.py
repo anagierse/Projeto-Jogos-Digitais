@@ -69,7 +69,7 @@ class Vilao(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (120, 150))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-        self.velocidade = 1#depois mudar velocidade
+        self.velocidade = 1 # velocidade do homem do saco
 
     def update(self, personagem):
         if personagem.rect.centerx > self.rect.centerx:

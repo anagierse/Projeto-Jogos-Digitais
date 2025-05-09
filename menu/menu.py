@@ -3,8 +3,8 @@ import pygame
 class Menu:
     def __init__(self, tela):
         self.tela = tela
-        self.fonte = pygame.font.SysFont(None, 55)
-        self.fonte_pequena = pygame.font.SysFont(None, 35)
+        self.fonte = pygame.font.SysFont("Comic Sans MS", 40)
+        self.fonte_pequena = pygame.font.SysFont("Comic Sans MS", 25)
         self.opcoes_principal = ["Jogar", "Sobre o Jogo", "Sair", "Ranking"]
         self.opcoes_fases = ["Fase 1", "Fase 2", "Fase 3", "Voltar"]
         self.estado = "principal"
@@ -60,7 +60,7 @@ class Menu:
         
         for i, opcao in enumerate(opcoes):
             texto = self.fonte.render(opcao, True, (255, 255, 255))
-            rect = texto.get_rect(center=(largura//2, altura//2 - 140 + i*60))
+            rect = texto.get_rect(center=(largura//2, altura//2 - 145 + i*60)) # altura do menu
             self.botoes.append((texto, rect, opcao))
             
     def navegar_mouse(self, pos):
@@ -97,6 +97,10 @@ class Menu:
                 self.criar_botoes()
                 
             for i, (texto, rect, opcao) in enumerate(self.botoes):
-                cor = (255, 0, 0) if i == self.selecionado else (255, 255, 255)
+                cor = (255, 255, 255) if i != self.selecionado else (255, 255, 0)
+
                 texto = self.fonte.render(opcao, True, cor)
+                
+                area_botao = rect.inflate(1, 1)
+
                 self.tela.blit(texto, rect)
