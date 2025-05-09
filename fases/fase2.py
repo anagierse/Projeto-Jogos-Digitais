@@ -6,7 +6,7 @@ from cenario.obstaculos import Obstaculo
 
 def executar(tela):
     config = {
-        "velocidade": 5,
+        "velocidade": 3,
         "intervalo_obstaculos": 1000,
         "cor_fundo": (142, 165, 219)
     }
@@ -30,7 +30,7 @@ def executar(tela):
 
         obstaculo_timer += clock.get_time()
         if obstaculo_timer > config["intervalo_obstaculos"]:  
-            tipo = random.choice(['poste', 'buraco', 'cone'])
+            tipo = random.choice(['poste', 'buraco'])
             x = random.randint(50, 750)
             obstaculo = Obstaculo(tipo, x, -100)
             grupo_obstaculos.add(obstaculo)
