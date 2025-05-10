@@ -10,6 +10,8 @@ class PersonagemBase(pygame.sprite.Sprite):
         self.rect.topleft = (x, y)
         self.velocidade = 5
         self.teclas = teclas_controle
+        self.velocidade = 5
+        self.lento_timer = 0
 
     def update(self, teclas_pressionadas):
         for direcao, teclas in self.teclas.items():
