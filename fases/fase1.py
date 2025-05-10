@@ -4,13 +4,17 @@ from cenario.rua import Rua
 from personagens.Personagem import Personagem1, Vilao
 from cenario.obstaculos import Obstaculo
 
-def executar(tela):
+def executar(tela, menu=None):#botando menu opcional
     config = {
         "velocidade": 3,
         "intervalo_obstaculos": 1500,
         "cor_fundo": (165, 219, 142)
     }
-    
+    TEMPO_FASE = 2 * 60
+    tempo_inicio = 0  
+    pontos_ja_adicionados = False
+  
+
     rua = Rua(800, 600)
     personagem = Personagem1(400, 300)
     vilao = Vilao(600, 400)
@@ -24,6 +28,14 @@ def executar(tela):
     running = True
 
     while running:
+        tempo_decorrido = (pygame.time.get_ticks() - tempo_inicio) // 1000
+        tempo_restante = max(0, TEMPO_FASE - tempo_decorrido)
+
+        if tempo_restante <= 0 and not pontos_ja_adicionados and menu:
+            menu.adicionar_pontos(50)
+            pontos_ja_adicionados = True
+            return True
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
@@ -74,5 +86,9 @@ def executar(tela):
         if vilao.rect.colliderect(zona_colisao):
             return False
         
+        fonte_tempo = pygame.font.SysFont("Arial", 24)
+        texto_tempo = fonte_tempo.render(f"Tempo: {tempo_restante}s", True, (0, 0, 0))
+        tela.blit(texto_tempo, (20, 20))
+
         pygame.display.flip()
         clock.tick(60)

@@ -23,8 +23,9 @@ def main():
             return
             
         if escolha in fases:
-            if not fases[escolha](tela):
-                break
+            resultado = fases[escolha](tela, menu)  
+            if resultado:  
+                print(f"Você ganhou 50 pontos")
 
 if __name__ == "__main__":
     main()
