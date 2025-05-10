@@ -1,89 +1,189 @@
+
+# main.py
 import pygame
+from menu.menu import Menu
+from fases import fase1, fase2, fase3
+
+def main():
+    pygame.init()
+    tela = pygame.display.set_mode((800, 600))
+    pygame.display.set_caption("Meu Jogo")
+    clock = pygame.time.Clock()
+
+    menu = Menu(tela)
+    fases = {
+        "Fase 1": fase1.executar,
+        "Fase 2": fase2.executar,
+        "Fase 3": fase3.executar
+    }
+
+    while True:
+        escolha = menu.executar()
+
+        if escolha == "Sair":
+            pygame.quit()
+            return
+
+        if escolha == "Ranking":
+            from menu.ranking.ranking import Ranking
+            ranking_screen = Ranking(tela)
+            ranking_screen.executar()
+            continue
+
+        if escolha in fases:
+            if not fases[escolha](tela):
+                break
+
+if __name__ == "__main__":
+    main()
+
+# menu/menu.py
+import pygame
+import os
+
+class Menu:
+    def __init__(self, tela):
+        self.tela = tela
+        pygame.font.init()
+        self.fonte = pygame.font.SysFont("Comic Sans MS", 40)
+        self.fonte_pequena = pygame.font.SysFont("Comic Sans MS", 25)
+        self.opcoes_principal = ["Jogar", "Sobre o Jogo", "Ranking", "Sair"]
+        self.opcoes_fases = ["Fase 1", "Fase 2", "Fase 3", "Voltar"]
+        self.estado = "principal"
+        self.selecionado = 0
+        self.botoes = []
+        # Carrega imagem de fundo
+        caminho = os.path.join(os.path.dirname(__file__), "imagens", "fundomenu.png")
+        if os.path.exists(caminho):
+            img = pygame.image.load(caminho)
+            self.imagem_fundo = pygame.transform.scale(img, self.tela.get_size())
+        else:
+            self.imagem_fundo = None
+
+    def executar(self):
+        clock = pygame.time.Clock()
+        while True:
+            self.criar_botoes()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return "Sair"
+                if event.type == pygame.MOUSEMOTION:
+                    self.navegar_mouse(event.pos)
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    escolha = self.processar_clique(event.pos)
+                    if escolha == "Ranking":
+                        return "Ranking"
+                    if escolha == "Jogar":
+                        self.estado = "fases"
+                    elif escolha == "Sobre o Jogo":
+                        self.estado = "sobre"
+                    elif escolha == "Voltar":
+                        self.estado = "principal"
+                    elif escolha == "Sair":
+                        return "Sair"
+                    elif escolha in self.opcoes_fases:
+                        return escolha
+
+            self.desenhar()
+            pygame.display.flip()
+            clock.tick(30)
+
+    def criar_botoes(self):
+        largura, altura = self.tela.get_size()
+        self.botoes = []
+        if self.estado == "sobre":
+            return
+        opcoes = self.opcoes_fases if self.estado == "fases" else self.opcoes_principal
+        self.botoes = []
+        for i, opcao in enumerate(opcoes):
+            rect = pygame.Rect(0, 0, 200, 50)
+            rect.center = (largura // 2, altura // 2 - 100 + i * 60)
+            self.botoes.append((opcao, rect))
+
+    def processar_clique(self, pos):
+        for opcao, rect in self.botoes:
+            if rect.collidepoint(pos):
+                return opcao
+        return None
+
+    def navegar_mouse(self, pos):
+        for i, (_, rect) in enumerate(self.botoes):
+            if rect.collidepoint(pos):
+                self.selecionado = i
+
+    def desenhar(self):
+        if self.imagem_fundo:
+            self.tela.blit(self.imagem_fundo, (0, 0))
+        else:
+            self.tela.fill((0,0,0))
+
+        if self.estado == "sobre":
+            titulo = self.fonte.render("Sobre o Jogo", True, (255, 255, 0))
+            self.tela.blit(titulo, (50, 50))
+            linhas = ["Este é um jogo de exemplo.", "Pressione Voltar para retornar ao menu."]
+            for i, l in enumerate(linhas):
+                t = self.fonte_pequena.render(l, True, (255, 255, 255))
+                self.tela.blit(t, (50, 150 + i * 40))
+        else:
+            for i, (opcao, rect) in enumerate(self.botoes):
+                cor = (255, 255, 0) if i == self.selecionado else (255, 255, 255)
+                texto = self.fonte.render(opcao, True, cor)
+                self.tela.blit(texto, texto.get_rect(center=rect.center))
+
+# menu/ranking/ranking.py
+import pygame
+import os
 
 class Ranking:
     def __init__(self, tela):
         self.tela = tela
-        self.fonte_titulo = pygame.font.Font("menu/fontes/ChauPhilomeneOne-Regular.ttf", 100)
-        self.fonte_itens = pygame.font.Font("menu/fontes/ChauPhilomeneOne-Regular.ttf", 36)
-        self.cor_azul = (20, 25, 90)  
-        self.rect_azul = pygame.Rect(0, 0, 650, 450)
-        self.rect_azul.center = self.tela.get_rect().center
-        self.voltar_botao = pygame.Rect(350, 520, 100, 50)
+        pygame.font.init()
+        self.fonte_titulo = pygame.font.SysFont("Arial", 60, bold=True)
+        self.fonte_itens = pygame.font.SysFont("Arial", 32)
+        base = os.path.dirname(__file__)
+        self.caminho = os.path.join(base, "ranking.txt")
+        print("Caminho de ranking:", self.caminho)
         self.ranking_data = self.carregar_ranking()
 
     def carregar_ranking(self):
+        lista = []
         try:
-            with open("menu/ranking.txt", "r") as arquivo:
-                conteudo = arquivo.read().strip()
-                if not conteudo:
-                    return []
-                # Divide os registros por ";" e depois nome/pontuação por ","
-                #Por causa que estamos guardando nome1, pontuacao; nome2, pontuacao;
-                registros = [reg.strip().split(",") for reg in conteudo.split(";") if reg]
-                # Converte pontuação para inteiro e ordena do maior para o menor
-                registros_ordenados = sorted(registros, key=lambda x: int(x[1]), reverse=True)
-                return registros_ordenados[:10]  # Mostra só o top 10
+            with open(self.caminho, "r", encoding="utf-8") as f:
+                for linha in f:
+                    if "," in linha:
+                        nome, pts = linha.strip().split(",", 1)
+                        lista.append((nome, int(pts)))
         except FileNotFoundError:
-            return []
-
-    def salvar_pontuacao(self, nome, pontuacao):
-        # Adiciona a nova pontuação no início (topo) e reordena
-        nova_entrada = f"{nome},{pontuacao}"
-        registros_existentes = ";".join([f"{reg[0]},{reg[1]}" for reg in self.ranking_data])
-        novo_conteudo = f"{nova_entrada};{registros_existentes}" if registros_existentes else nova_entrada
-        
-        with open("menu/ranking.txt", "w") as arquivo:
-            arquivo.write(novo_conteudo)
-        
-        # Recarrega os dados atualizados
-        self.ranking_data = self.carregar_ranking()
+            print("Arquivo não encontrado.")
+            open(self.caminho, "w", encoding="utf-8").close()
+        print("Dados carregados:", lista)
+        lista.sort(key=lambda x: x[1], reverse=True)
+        return lista[:10]
 
     def executar(self):
-        fundo = pygame.image.load("menu/ranking.png").convert()
-        fundo = pygame.transform.scale(fundo, (800, 600))
-        
-        rodando = True
-        while rodando:
-            for evento in pygame.event.get():
-                if evento.type == pygame.QUIT:
-                    return False
-                if evento.type == pygame.MOUSEBUTTONDOWN:
-                    if self.voltar_botao.collidepoint(evento.pos):
-                        return True
+        clock = pygame.time.Clock()
+        while True:
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    pygame.quit()
+                    return
+                if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+                    return
 
-            # Desenha fundo e  onde ficam os nomes retângulo azul
-            self.tela.blit(fundo, (0, 0))
-            superficie_azul = pygame.Surface((self.rect_azul.width, self.rect_azul.height), pygame.SRCALPHA)
-            pygame.draw.rect(superficie_azul, (*self.cor_azul, 82), superficie_azul.get_rect(), border_radius=10)
-            self.tela.blit(superficie_azul, self.rect_azul.topleft)
-            
-            # Título "RANKING"
-            titulo = self.fonte_titulo.render("RANKING", True, (255, 255, 255))
-            titulo_rect = titulo.get_rect(centerx=self.rect_azul.centerx, top=self.rect_azul.top + 20)
-            self.tela.blit(titulo, titulo_rect)
-            
+            # Desenho de fundo
+            self.tela.fill((30,30,50))
 
-            cabecalho_nome = self.fonte_itens.render("Jogador", True, (255, 255, 255))
-            cabecalho_pontos = self.fonte_itens.render("Pontos", True, (255, 255, 255))
-            self.tela.blit(cabecalho_nome, (self.rect_azul.left + 100, self.rect_azul.top + 100))
-            self.tela.blit(cabecalho_pontos, (self.rect_azul.right - 150, self.rect_azul.top + 100))
-            
-            # Itens do ranking
-            for i, (nome, pontos) in enumerate(self.ranking_data):
-                posicao = self.fonte_itens.render(f"{i+1}º", True, (255, 255, 255))
-                jogador = self.fonte_itens.render(nome, True, (255, 255, 255))
-                pontuacao = self.fonte_itens.render(pontos, True, (255, 255, 255))
-                
-                self.tela.blit(posicao, (self.rect_azul.left + 50, self.rect_azul.top + 150 + i * 40))
-                self.tela.blit(jogador, (self.rect_azul.left + 100, self.rect_azul.top + 150 + i * 40))
-                self.tela.blit(pontuacao, (self.rect_azul.right - 150, self.rect_azul.top + 150 + i * 40))
-            
-            # Botão "Voltar"
-            pygame.draw.rect(self.tela, (100, 100, 100), self.voltar_botao, border_radius=5)
-            texto_voltar = self.fonte_itens.render("Voltar", True, (255, 255, 255))
-            self.tela.blit(texto_voltar, (self.voltar_botao.centerx - texto_voltar.get_width()//2, 
-                                          self.voltar_botao.centery - texto_voltar.get_height()//2))
-            
+            # Título
+            titulo = self.fonte_titulo.render("RANKING", True, (255,255,255))
+            self.tela.blit(titulo, (self.tela.get_width()//2 - titulo.get_width()//2, 50))
+
+            # Itens
+            for i, (nome, pts) in enumerate(self.ranking_data):
+                y = 150 + i * 40
+                txt_pos = self.fonte_itens.render(f"{i+1}º {nome}", True, (255,255,255))
+                txt_pts = self.fonte_itens.render(str(pts), True, (255,255,255))
+                self.tela.blit(txt_pos, (100, y))
+                self.tela.blit(txt_pts, (600, y))
+
             pygame.display.flip()
-        
-        return True
+            clock.tick(60)
