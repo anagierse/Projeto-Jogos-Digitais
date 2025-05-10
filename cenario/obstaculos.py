@@ -1,12 +1,11 @@
 import pygame
-import random
 
 class Obstaculo(pygame.sprite.Sprite):
-    def __init__(self, tipo, x, y):
+    def __init__(self, tipo, x, y, rua):  # Adicionado parâmetro rua
         super().__init__()
         self.tipo = tipo  
         self.velocidade = 3
-        self.rua = rua  # Referência à instância da rua
+        self.rua = rua  # Referência à instância da rua (MODIFICADO)
         self.na_rua = False  # Flag para controle
 
         if tipo == 'poste':
@@ -15,9 +14,9 @@ class Obstaculo(pygame.sprite.Sprite):
         elif tipo == 'buraco':
             self.image = pygame.Surface((50, 50), pygame.SRCALPHA)
             pygame.draw.circle(self.image, (50, 50, 50), (25, 25), 25)
-        elif tipo == 'lixo':
-            self.image = pygame.image.load('cenario/imagens/lixo.png').convert_alpha()
-            self.image = pygame.transform.scale(self.image, (50, 50))
+        #elif tipo == 'lixo':
+        #    self.image = pygame.image.load('cenario/imagens/lixo.png').convert_alpha()
+        #    self.image = pygame.transform.scale(self.image, (50, 50))
         elif tipo == 'carro':
             self.image = pygame.image.load('cenario/imagens/carro.png').convert_alpha()
             self.image = pygame.transform.scale(self.image, (80, 50))
