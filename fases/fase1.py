@@ -32,12 +32,19 @@ def executar(tela):
                     return True
 
         obstaculo_timer += clock.get_time()
-        if obstaculo_timer > config["intervalo_obstaculos"]:  
-            tipo = random.choice(['poste', 'buraco'])
-            x = random.randint(50, 750)
-            obstaculo = Obstaculo(tipo, x, -100)
-            grupo_obstaculos.add(obstaculo)
-            obstaculo_timer = 0
+        if obstaculo_timer > config["intervalo_obstaculos"]:
+            tipo = random.choice(['poste', 'buraco', 'lixo'])
+            
+            if random.choice([True, False]):  # 50% para cada lado
+                x = random.randint(50, 250)   # Lado esquerdo
+            else:
+                x = random.randint(550, 750)  # Lado direito
+            
+            obstaculo = Obstaculo(tipo, x, -100, rua)
+
+            if not any(obstaculo.rect.colliderect(o.rect) for o in grupo_obstaculos):
+                grupo_obstaculos.add(obstaculo)
+                obstaculo_timer = 0
 
         teclas = pygame.key.get_pressed()
         rua.atualizar(config["velocidade"])
@@ -45,6 +52,16 @@ def executar(tela):
         grupo_obstaculos.update()
         vilao.update(personagem) 
 
+        for obstaculo in grupo_obstaculos:
+            if obstaculo.tipo == 'buraco' and personagem.rect.colliderect(obstaculo.rect):
+                grupo_personagens.remove(personagem)
+            elif obstaculo.tipo in ['poste', 'lixo'] and personagem.rect.colliderect(obstaculo.rect):
+                personagem.velocidade = 1
+                personagem.lento_timer = pygame.time.get_ticks()
+
+        if personagem.lento_timer and pygame.time.get_ticks() - personagem.lento_timer > 1000:
+            personagem.velocidade = 3
+            personagem.lento_timer = 0
 
         tela.fill(config["cor_fundo"])
         rua.desenhar(tela)
