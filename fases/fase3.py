@@ -30,11 +30,16 @@ def executar(tela):
 
         obstaculo_timer += clock.get_time()
         if obstaculo_timer > config["intervalo_obstaculos"]:  
-            tipo = random.choice(['poste', 'buraco', 'cone', 'carro'])
-            x = random.randint(50, 750)
-            obstaculo = Obstaculo(tipo, x, -100)
-            grupo_obstaculos.add(obstaculo)
-            obstaculo_timer = 0
+            tipo = random.choice(['poste', 'buraco', 'lixo', 'carro'])
+            
+            lado = random.choice(['esquerda', 'direita'])
+            x = random.randint(50, 250) if lado == 'esquerda' else random.randint(550, 750)
+            
+            obstaculo = Obstaculo(tipo, x, -100, rua)
+            
+            if not any(obstaculo.rect.colliderect(o.rect) for o in grupo_obstaculos):
+                grupo_obstaculos.add(obstaculo)
+                obstaculo_timer = 0
 
         teclas = pygame.key.get_pressed()
         rua.atualizar(config["velocidade"])
