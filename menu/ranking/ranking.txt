@@ -1,0 +1,14 @@
+Ana,1200
+Carlos,900
+Maria,850
+João,800
+a,0
+n,0
+a,0
+a,0
+a,0
+a,0
+Luana,0
+Luaa,0
+Luana,0
+lua,0
