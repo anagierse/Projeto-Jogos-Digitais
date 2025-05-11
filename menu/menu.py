@@ -1,6 +1,8 @@
 import pygame
 import os
 from menu.ranking.ranking import Ranking
+from quiz.quiz import executar_quiz
+
 
 class Menu:
     def __init__(self, tela):
@@ -8,7 +10,7 @@ class Menu:
         pygame.font.init()
         self.fonte = pygame.font.SysFont("Comic Sans MS", 40)
         self.fonte_pequena = pygame.font.SysFont("Comic Sans MS", 25)
-        self.opcoes_principal = ["Jogar", "Sobre o Jogo", "Ranking", "Sair"]
+        self.opcoes_principal = ["Jogar", "Sobre o Jogo", "Ranking", "Quiz", "Sair"]
         self.opcoes_fases = ["Fase 1", "Fase 2", "Fase 3", "Voltar"]
         self.estado = "principal"
         self.selecionado = 0
@@ -47,6 +49,8 @@ class Menu:
                         self.estado = "fases"
                     elif escolha == "Sobre o Jogo":
                         self.estado = "sobre"
+                    elif escolha == "Quiz":
+                        executar_quiz() 
                     elif escolha == "Voltar":
                         self.estado = "principal"
                     elif escolha == "Sair":

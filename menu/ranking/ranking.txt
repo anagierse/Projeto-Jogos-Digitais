@@ -4,3 +4,4 @@ Maria,850
 João,800
 ana,0
 ana,0
+ANA,0
