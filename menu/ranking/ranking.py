@@ -25,6 +25,19 @@ class Ranking:
         except (FileNotFoundError, ValueError):
             return []
 
+    def adicionar_pontuacao(self, nome_jogador, pontos):
+        """Adiciona uma nova pontuação ao ranking"""
+        self.ranking_data.append((nome_jogador, pontos))
+        # Ordena do maior para o menor
+        self.ranking_data.sort(key=lambda x: x[1], reverse=True)
+        # Mantém apenas as top 10 pontuações
+        self.ranking_data = self.ranking_data[:10]
+        
+        # Salva no arquivo
+        with open(self.caminho, "w", encoding="utf-8") as f:
+            for nome, pts in self.ranking_data:
+                f.write(f"{nome},{pts}\n")
+
     def executar(self):
         clock = pygame.time.Clock()
         rodando = True
@@ -41,7 +54,7 @@ class Ranking:
             # Desenha o fundo do menu por trás
             self.tela.blit(pygame.image.load(os.path.join("menu", "imagens", "fundomenu.png")).convert(), (0, 0))
             
-            # Dsign de fundo azul transparente
+            # Design de fundo azul transparente
             self.tela.blit(self.fundo_transparente, (100, 100))
             
             titulo = self.fonte_titulo.render("RANKING", True, (255, 255, 0))
@@ -59,3 +72,5 @@ class Ranking:
 
             pygame.display.flip()
             clock.tick(60)
+        
+        return False

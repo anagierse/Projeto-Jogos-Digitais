@@ -1,48 +1,55 @@
 import pygame
 import random
 from cenario.rua import Rua
-from personagens.Personagem import Personagem2, Vilao
+from personagens.Personagem import Personagem2Modificado
 from cenario.obstaculos import Obstaculo
+from cenario.carro import Carro
+from cenario.coletaveis import Pilula
 
-def executar(tela, menu = None):
+
+def executar(tela, menu=None):
     config = {
         "velocidade": 5,
         "intervalo_obstaculos": 1000,
-        "cor_fundo": (142, 165, 219)
+        "cor_fundo": (142, 165, 219),
+        "intervalo_pilula": 7000
     }
     TEMPO_FASE = 2 * 60
-    tempo_inicio = pygame.time.get_ticks()  # Inicializa o timer corretamente
+    tempo_inicio = pygame.time.get_ticks()
     pontos_ja_adicionados = False
-
-    try:
-        game_over_img = pygame.image.load("menu/imagens/gameover.png").convert_alpha()
-        game_over_img = pygame.transform.scale(game_over_img, (800, 600))
-    except:
-        game_over_img = None
     game_over = False
+    pontuacao = 0  # Variável para armazenar os pontos
 
+    # Inicializa objetos
     rua = Rua(800, 600)
-    personagem = Personagem2(400, 300)
-    vilao = Vilao(600, 400)
+    personagem = Personagem2Modificado(400, 300)
+    carro = None
+    pilulas = []
+    pilula_timer = 0
 
+    # Grupos de sprites
     grupo_personagens = pygame.sprite.Group(personagem)
-    grupo_viloes = pygame.sprite.Group(vilao)
     grupo_obstaculos = pygame.sprite.Group()
 
     clock = pygame.time.Clock()
-    obstaculo_timer = 0
     running = True
+    obstaculo_timer = 0
 
     while running:
+        delta_time = clock.get_time()
+        
         if not game_over:
-            tempo_decorrido = (pygame.time.get_ticks() - tempo_inicio) // 1000
-            tempo_restante = max(0, TEMPO_FASE - tempo_decorrido)
-
+            # Lógica do jogo
+            tempo_restante = max(0, TEMPO_FASE - (pygame.time.get_ticks() - tempo_inicio) // 1000)
+            
+            # Verifica se completou a fase
             if tempo_restante <= 0 and not pontos_ja_adicionados and menu:
-                menu.adicionar_pontos(50)
+                pontuacao_total = pontuacao + 50  # 50 pontos por completar a fase
+                menu.adicionar_pontos(pontuacao_total)
                 pontos_ja_adicionados = True
                 return True
             
+            # Eventos
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return False
@@ -52,67 +59,87 @@ def executar(tela, menu = None):
                     if event.key == pygame.K_r and game_over:
                         return executar(tela, menu)
 
-            obstaculo_timer += clock.get_time()
-            if obstaculo_timer > config["intervalo_obstaculos"]:
-                tipo = random.choice(['poste', 'buraco', 'lixo'])
-                
-                lado = random.choice(['esquerda', 'direita'])
-                x = random.randint(50, 250) if lado == 'esquerda' else random.randint(550, 750)
-                
-                obstaculo = Obstaculo(tipo, x, -100, rua)
-
-                if not any(obstaculo.rect.colliderect(o.rect) for o in grupo_obstaculos):
-                    grupo_obstaculos.add(obstaculo)
-                    obstaculo_timer = 0
-
+            # Atualizações
             teclas = pygame.key.get_pressed()
             rua.atualizar(config["velocidade"])
             grupo_personagens.update(teclas)
             grupo_obstaculos.update()
-            vilao.update(personagem)
 
+            # Gera obstáculos
+            obstaculo_timer += delta_time
+            if obstaculo_timer > config["intervalo_obstaculos"]:
+                lado = 'esquerda' if random.random() < 0.5 else 'direita'
+                x = random.randint(50, 250) if lado == 'esquerda' else random.randint(550, 750)
+                obstaculo = Obstaculo(random.choice(['poste', 'buraco', 'lixo']), x, -100, rua)
+                grupo_obstaculos.add(obstaculo)
+                obstaculo_timer = 0
+
+            # Gera pílulas
+            pilula_timer += delta_time
+            if pilula_timer > config["intervalo_pilula"]:
+                pilulas.append(Pilula(random.randint(50, 750), -100))
+                pilula_timer = 0
+
+            # Atualiza pílulas e verifica colisões
+            for pilula in pilulas[:]:
+                pilula.atualizar()
+                if pilula.pos_Y > 600:
+                    pilulas.remove(pilula)
+                elif personagem.rect.colliderect(pilula.rect):
+                    personagem.aplicar_efeito_pilula()
+                    pontuacao += 60  # Adiciona 60 pontos por pílula coletada
+                    pilulas.remove(pilula)
+
+            # Sistema do carro
+            if rua.visible and carro is None:
+                carro = Carro(100, rua.y_pos + 20, config["velocidade"])
+            if carro:
+                carro.atualizar()
+                if carro.pos_X + carro.largura < 0 or not rua.visible:
+                    carro = None
+                elif personagem.rect.colliderect(pygame.Rect(carro.pos_X, carro.pos_Y, carro.largura, carro.altura)):
+                    game_over = True
+
+            # Verifica colisões com obstáculos
             for obstaculo in grupo_obstaculos:
-                if obstaculo.tipo == 'buraco' and personagem.rect.colliderect(obstaculo.rect):
-                    game_over = True  # Modificado para ativar game over
-                elif obstaculo.tipo in ['poste', 'lixo'] and personagem.rect.colliderect(obstaculo.rect):
-                    personagem.velocidade = 2
-                    personagem.lento_timer = pygame.time.get_ticks()
+                if personagem.rect.colliderect(obstaculo.rect):
+                    if obstaculo.tipo == 'buraco':
+                        game_over = True
+                    else:
+                        personagem.velocidade = 2
+                        personagem.lento_timer = pygame.time.get_ticks()
 
-            if personagem.lento_timer and pygame.time.get_ticks() - personagem.lento_timer > 1000:
-                personagem.velocidade = 5
-                personagem.lento_timer = 0
-
+            # Desenho
             tela.fill(config["cor_fundo"])
             rua.desenhar(tela)
             grupo_obstaculos.draw(tela)
             grupo_personagens.draw(tela)
-            vilao.desenhar(tela)
+            if carro: carro.desenhar(tela)
+            for pilula in pilulas: pilula.desenhar(tela)
 
-            zona_colisao = personagem.rect.inflate(-50, -50)
-            if vilao.rect.colliderect(zona_colisao):
-                game_over = True  # Modificado para ativar game over
+            # UI - Informações na tela
+            fonte = pygame.font.SysFont("Arial", 24)
+            tela.blit(fonte.render(f"Tempo: {tempo_restante}s", True, (0, 0, 0)), (20, 20))
+            tela.blit(fonte.render(f"Pontos: {pontuacao}", True, (0, 0, 0)), (20, 50))  # Mostra pontos
             
-            fonte_tempo = pygame.font.SysFont("Arial", 24)
-            texto_tempo = fonte_tempo.render(f"Tempo: {tempo_restante}s", True, (0, 0, 0))
-            tela.blit(texto_tempo, (20, 20))
+            if personagem.controles_invertidos:
+                t_efeito = max(0, (personagem.efeito_timer - pygame.time.get_ticks()) // 1000)
+                tela.blit(fonte.render(f"Efeito: {t_efeito}s", True, (255, 255, 0)), (20, 80))
+
         else:
+            # Tela de Game Over
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
+                if event.type == pygame.QUIT: running = False
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_r:  # Reiniciar
-                        return executar(tela, menu)
-                    if event.key == pygame.K_ESCAPE:  # Voltar ao menu
-                        return True
+                    if event.key == pygame.K_r: return executar(tela, menu)
+                    if event.key == pygame.K_ESCAPE: return True
 
-            if game_over_img:
-                tela.blit(game_over_img, (0, 0))
-            else:
-                tela.fill((0, 0, 0))
-                fonte = pygame.font.SysFont("Arial", 40)
-                texto = fonte.render("GAME OVER - Pressione R para reiniciar", True, (255, 0, 0))
-                tela.blit(texto, (100, 300))
-
+            tela.fill((0, 0, 0))
+            fonte = pygame.font.SysFont("Arial", 40)
+            tela.blit(fonte.render("GAME OVER - Pressione R para reiniciar", True, (255, 0, 0)), (100, 300))
+            # Mostra pontuação final no game over
+            fonte_pontos = pygame.font.SysFont("Arial", 36)
+            tela.blit(fonte_pontos.render(f"Pontuação final: {pontuacao}", True, (255, 255, 255)), (250, 350))
 
         pygame.display.flip()
         clock.tick(60)

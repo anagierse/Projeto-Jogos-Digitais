@@ -15,11 +15,14 @@ class Obstaculo(pygame.sprite.Sprite):
             self.image = pygame.Surface((50, 50), pygame.SRCALPHA)
             pygame.draw.circle(self.image, (50, 50, 50), (25, 25), 25)
         elif tipo == 'lixo':
-            self.image = pygame.image.load('cenario/imagens/lixo.png').convert_alpha()
-            self.image = pygame.transform.scale(self.image, (50, 50))
+           self.image = pygame.image.load('cenario/imagens/lixo.png').convert_alpha()
+           self.image = pygame.transform.scale(self.image, (50, 50))
+        elif tipo == 'carro':
+            self.image = pygame.image.load('cenario/imagens/carro.png').convert_alpha()
+            self.image = pygame.transform.scale(self.image, (80, 50))
         else:
             raise ValueError("Tipo de obstáculo inválido.")
-            #apaguei o problema
+            
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
