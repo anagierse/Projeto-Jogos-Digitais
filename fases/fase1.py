@@ -56,7 +56,6 @@ def executar(tela, menu=None):#botando menu opcional
 
             obstaculo_timer += clock.get_time()
             if obstaculo_timer > config["intervalo_obstaculos"]:
-               # tipo = random.choice(['poste', 'buraco', 'lixo'])
                 tipo = random.choice(['poste', 'buraco', 'lixo'])
                 
                 if random.choice([True, False]):  # 50% para cada lado
@@ -91,7 +90,7 @@ def executar(tela, menu=None):#botando menu opcional
             rua.desenhar(tela)
             grupo_obstaculos.draw(tela)
             grupo_personagens.draw(tela)
-            vilao.desenhar(tela) 
+            vilao.desenhar(tela)
 
             zona_colisao = personagem.rect.inflate(-50, -50)  # diminui o retangulo, mantendo o centro o mesmo.
 
