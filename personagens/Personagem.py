@@ -8,9 +8,8 @@ class PersonagemBase(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, tamanho)
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-        self.velocidade = 5
+        self.velocidade = 6
         self.teclas = teclas_controle
-        self.velocidade = 5
         self.lento_timer = 0
 
     def update(self, teclas_pressionadas):
@@ -143,7 +142,7 @@ class Vilao(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (120, 150))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-        self.velocidade = 1 # velocidade do homem do saco
+        self.velocidade = 0.6 # velocidade do homem do saco
 
     def update(self, personagem):
         if personagem.rect.centerx > self.rect.centerx:
@@ -156,6 +155,41 @@ class Vilao(pygame.sprite.Sprite):
         elif personagem.rect.centery < self.rect.centery:
             self.rect.y -= self.velocidade
 
+        if self.rect.left < -30:
+            self.rect.left = -30
+        if self.rect.right > 830:
+            self.rect.right = 830
+        if self.rect.top < -10:
+            self.rect.top = -10
+        if self.rect.bottom > 610:
+            self.rect.bottom = 610
+
+    def desenhar(self, display):
+        display.blit(self.image, self.rect.topleft)
+
+            
+class Vilao2(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.image.load('personagens/imagens/agiota.png')  
+        self.image = pygame.transform.scale(self.image, (130, 160))  
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+        self.velocidade = 0.6  
+
+    def update(self, personagem_alvo):
+        # Movimento em direção ao personagem alvo
+        if personagem_alvo.rect.centerx > self.rect.centerx:
+            self.rect.x += self.velocidade
+        elif personagem_alvo.rect.centerx < self.rect.centerx:
+            self.rect.x -= self.velocidade
+
+        if personagem_alvo.rect.centery > self.rect.centery:
+            self.rect.y += self.velocidade
+        elif personagem_alvo.rect.centery < self.rect.centery:
+            self.rect.y -= self.velocidade
+
+        # Limites da tela
         if self.rect.left < -30:
             self.rect.left = -30
         if self.rect.right > 830:

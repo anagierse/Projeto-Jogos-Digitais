@@ -1,7 +1,7 @@
 import pygame
 import random
 from cenario.rua import Rua
-from personagens.Personagem import Personagem3
+from personagens.Personagem import Personagem3,Vilao2
 from cenario.obstaculos import Obstaculo
 from cenario.coletaveis import Dinheiro, Maquina
 from cenario.carro import Carro
@@ -34,6 +34,10 @@ def executar(tela, menu=None):
     # Inicialização de objetos
     rua = Rua(800, 600)
     personagem = Personagem3(400, 300)
+    vilao2 = Vilao2(700, 100) 
+
+    
+    
     carro = None
     dinheiros = []
     maquinas = []
@@ -108,6 +112,8 @@ def executar(tela, menu=None):
             rua.atualizar(config["velocidade"])
             grupo_personagens.update(teclas)
             grupo_obstaculos.update()
+            vilao2.update(personagem)
+
 
             # Atualização de carro
             if rua.visible and carro is None:
@@ -137,6 +143,11 @@ def executar(tela, menu=None):
                 elif personagem.rect.colliderect(maquina.rect):
                     pontuacao -= config["perda_maquina"]
                     maquinas.remove(maquina)
+                    
+             # Verificação de colisões com agiota        
+            zona_colisao = personagem.rect.inflate(-65, -65)#diminui a area de colisão
+            if vilao2.rect.colliderect(zona_colisao):
+                game_over = True
 
             # Verificação de colisões com obstáculos
             for obstaculo in grupo_obstaculos:
@@ -155,6 +166,8 @@ def executar(tela, menu=None):
             # Renderização
             tela.fill(config["cor_fundo"])
             rua.desenhar(tela)
+            vilao2.desenhar(tela)
+
             grupo_obstaculos.draw(tela)
             grupo_personagens.draw(tela)
             

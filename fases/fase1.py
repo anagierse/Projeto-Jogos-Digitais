@@ -144,7 +144,7 @@ def executar(tela, menu=None):
                 pirulito.desenhar(tela)
 
             # Verificação de colisão com vilão
-            zona_colisao = personagem.rect.inflate(-50, -50)
+            zona_colisao = personagem.rect.inflate(-65, -65)
             if vilao.rect.colliderect(zona_colisao):
                 game_over = True
             
