@@ -1,7 +1,7 @@
 import pygame
 import random
 from cenario.rua import Rua
-from Personagens.Personagem import Personagem1
+from personagens.Personagem import Personagem1
 from cenario.obstaculos import Obstaculo  # Importando a classe Obstaculo
 
 def main():
