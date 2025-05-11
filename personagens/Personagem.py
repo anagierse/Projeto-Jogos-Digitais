@@ -63,7 +63,70 @@ class Personagem2(PersonagemBase):
         }
         tamanho = (150, 150)
         super().__init__('personagens/imagens/personagemadolescente.png', x, y, teclas_controle, tamanho)
-        
+        self.velocidade = 5
+        self.lento_timer = 0
+
+    def update(self, teclas_pressionadas):
+        # Implementação original do update
+        movimento = {
+            "esquerda": any(teclas_pressionadas[tecla] for tecla in self.teclas_controle["esquerda"]),
+            "direita": any(teclas_pressionadas[tecla] for tecla in self.teclas_controle["direita"]),
+            "cima": any(teclas_pressionadas[tecla] for tecla in self.teclas_controle["cima"]),
+            "baixo": any(teclas_pressionadas[tecla] for tecla in self.teclas_controle["baixo"])
+        }
+
+        if movimento["esquerda"]:
+            self.rect.x -= self.velocidade
+        if movimento["direita"]:
+            self.rect.x += self.velocidade
+        if movimento["cima"]:
+            self.rect.y -= self.velocidade
+        if movimento["baixo"]:
+            self.rect.y += self.velocidade
+
+        self.rect.x = max(0, min(self.rect.x, 800 - self.rect.width))
+        self.rect.y = max(0, min(self.rect.y, 600 - self.rect.height))
+
+class Personagem2Modificado(Personagem2):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.velocidade_padrao = 5
+        self.velocidade = self.velocidade_padrao
+        self.controles_invertidos = False
+        self.efeito_timer = 0
+        self.duracao_efeito = 5000  # 5 segundos de efeito
+
+    def update(self, teclas_pressionadas):
+        # Verifica se o efeito acabou
+        if self.controles_invertidos and pygame.time.get_ticks() > self.efeito_timer:
+            self.controles_invertidos = False
+            self.velocidade = self.velocidade_padrao
+
+        # Mapeamento das teclas (invertidas ou normais)
+        esquerda = (teclas_pressionadas[pygame.K_DOWN] or teclas_pressionadas[pygame.K_s]) if self.controles_invertidos else (teclas_pressionadas[pygame.K_LEFT] or teclas_pressionadas[pygame.K_a])
+        direita = (teclas_pressionadas[pygame.K_UP] or teclas_pressionadas[pygame.K_w]) if self.controles_invertidos else (teclas_pressionadas[pygame.K_RIGHT] or teclas_pressionadas[pygame.K_d])
+        cima = (teclas_pressionadas[pygame.K_RIGHT] or teclas_pressionadas[pygame.K_d]) if self.controles_invertidos else (teclas_pressionadas[pygame.K_UP] or teclas_pressionadas[pygame.K_w])
+        baixo = (teclas_pressionadas[pygame.K_LEFT] or teclas_pressionadas[pygame.K_a]) if self.controles_invertidos else (teclas_pressionadas[pygame.K_DOWN] or teclas_pressionadas[pygame.K_s])
+
+        # Movimentação
+        if esquerda:
+            self.rect.x -= self.velocidade
+        if direita:
+            self.rect.x += self.velocidade
+        if cima:
+            self.rect.y -= self.velocidade
+        if baixo:
+            self.rect.y += self.velocidade
+
+        # Mantém dentro da tela
+        self.rect.x = max(0, min(self.rect.x, 800 - self.rect.width))
+        self.rect.y = max(0, min(self.rect.y, 600 - self.rect.height))
+
+    def aplicar_efeito_pilula(self):
+        self.velocidade += 2  # Aumenta a velocidade
+        self.controles_invertidos = True
+        self.efeito_timer = pygame.time.get_ticks() + self.duracao_efeito
+
 class Personagem3(PersonagemBase):
     def __init__(self, x, y):
         teclas_controle = {
