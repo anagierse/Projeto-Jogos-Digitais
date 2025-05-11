@@ -103,6 +103,10 @@ def executar(tela, menu=None):
             grupo_obstaculos.update()
             vilao.update(personagem)
 
+            # Verificação se saiu da tela pela parte de baixo
+            if personagem.rect.bottom >= 600:
+                game_over = True
+
             # Sistema do carro
             if rua.visible and carro is None:
                 carro = Carro(100, rua.y_pos + 20, config["velocidade"])

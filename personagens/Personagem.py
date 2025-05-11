@@ -35,9 +35,7 @@ class PersonagemBase(pygame.sprite.Sprite):
         if self.rect.bottom > 610:
             self.rect.bottom = 610
 
-        if self.rect.bottom > 600:
-            pygame.quit()
-            sys.exit()
+
 
     def desenhar(self, display):
         display.blit(self.image, self.rect.topleft)

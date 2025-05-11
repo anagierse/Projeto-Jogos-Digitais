@@ -22,6 +22,13 @@ def executar(tela, menu=None):
     tempo_inicio = pygame.time.get_ticks()
     pontos_ja_adicionados = False
     pontuacao = 0
+
+    # Sistema de Game Over (ADICIONADO igual fase 1)
+    try:
+        game_over_img = pygame.image.load("menu/imagens/gameover.png").convert_alpha()
+        game_over_img = pygame.transform.scale(game_over_img, (800, 600))
+    except:
+        game_over_img = None
     game_over = False
 
     # Inicialização de objetos
@@ -62,6 +69,11 @@ def executar(tela, menu=None):
                         return True
                     if event.key == pygame.K_r and game_over:
                         return executar(tela, menu)
+
+            # Verificação se saiu da tela (ADICIONADO igual fase 1)
+            if (personagem.rect.left <= 0 or personagem.rect.right >= 800 or 
+                personagem.rect.top <= 0 or personagem.rect.bottom >= 600):
+                game_over = True
 
             # Atualizações de tempo
             obstaculo_timer += delta_time
@@ -162,7 +174,7 @@ def executar(tela, menu=None):
             
             
         else:
-            # Tela de Game Over
+            # Tela de Game Over (MODIFICADO para usar a mesma imagem da fase 1)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -172,12 +184,9 @@ def executar(tela, menu=None):
                     if event.key == pygame.K_ESCAPE:
                         return True
 
-            # Tente carregar a imagem de game over
-            try:
-                game_over_img = pygame.image.load("menu/imagens/gameover.png").convert_alpha()
-                game_over_img = pygame.transform.scale(game_over_img, (800, 600))
+            if game_over_img:
                 tela.blit(game_over_img, (0, 0))
-            except:
+            else:
                 tela.fill((0, 0, 0))
                 fonte = pygame.font.SysFont("Arial", 40)
                 tela.blit(fonte.render("GAME OVER - Pressione R para reiniciar", True, (255, 0, 0)), (100, 300))

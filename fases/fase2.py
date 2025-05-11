@@ -20,6 +20,13 @@ def executar(tela, menu=None):
     game_over = False
     pontuacao = 0  # Variável para armazenar os pontos
 
+    # Sistema de Game Over (ADICIONADO igual fase 1)
+    try:
+        game_over_img = pygame.image.load("menu/imagens/gameover.png").convert_alpha()
+        game_over_img = pygame.transform.scale(game_over_img, (800, 600))
+    except:
+        game_over_img = None
+
     # Inicializa objetos
     rua = Rua(800, 600)
     personagem = Personagem2Modificado(400, 300)
@@ -64,6 +71,11 @@ def executar(tela, menu=None):
             rua.atualizar(config["velocidade"])
             grupo_personagens.update(teclas)
             grupo_obstaculos.update()
+
+            # Verificação se saiu da tela (ADICIONADO igual fase 1)
+            if (personagem.rect.left <= 0 or personagem.rect.right >= 800 or 
+                personagem.rect.top <= 0 or personagem.rect.bottom >= 600):
+                game_over = True
 
             # Gera obstáculos
             obstaculo_timer += delta_time
@@ -127,19 +139,21 @@ def executar(tela, menu=None):
                 tela.blit(fonte.render(f"Efeito: {t_efeito}s", True, (255, 255, 0)), (20, 80))
 
         else:
-            # Tela de Game Over
+            # Tela de Game Over (MODIFICADO para usar a mesma imagem da fase 1)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: running = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r: return executar(tela, menu)
                     if event.key == pygame.K_ESCAPE: return True
 
-            tela.fill((0, 0, 0))
-            fonte = pygame.font.SysFont("Arial", 40)
-            tela.blit(fonte.render("GAME OVER - Pressione R para reiniciar", True, (255, 0, 0)), (100, 300))
+            if game_over_img:
+                tela.blit(game_over_img, (0, 0))
+            else:
+                tela.fill((0, 0, 0))
+                fonte = pygame.font.SysFont("Arial", 40)
+            
             # Mostra pontuação final no game over
             fonte_pontos = pygame.font.SysFont("Arial", 36)
-            tela.blit(fonte_pontos.render(f"Pontuação final: {pontuacao}", True, (255, 255, 255)), (250, 350))
 
         pygame.display.flip()
         clock.tick(60)
