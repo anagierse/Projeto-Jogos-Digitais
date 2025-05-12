@@ -6,21 +6,24 @@ from cenario.obstaculos import Obstaculo
 from cenario.carro import Carro
 from cenario.coletaveis import Pilula
 
-
 def executar(tela, menu=None):
     config = {
         "velocidade": 5,
         "intervalo_obstaculos": 1000,
         "cor_fundo": (142, 165, 219),
-        "intervalo_pilula": 7000
+        "intervalo_pilula": 7000,
+        "limite_pilulas_para_inverter": 3,
+        "bonus_velocidade_por_pilula": 1,
+        "velocidade_maxima": 8
     }
     TEMPO_FASE = 2 * 60
     tempo_inicio = pygame.time.get_ticks()
     pontos_ja_adicionados = False
     game_over = False
-    pontuacao = 0  # Variável para armazenar os pontos
+    pontuacao = 0
+    contador_pilulas = 0
 
-    # Sistema de Game Over (ADICIONADO igual fase 1)
+    # Sistema de Game Over
     try:
         game_over_img = pygame.image.load("menu/imagens/gameover.png").convert_alpha()
         game_over_img = pygame.transform.scale(game_over_img, (800, 600))
@@ -49,9 +52,8 @@ def executar(tela, menu=None):
             # Lógica do jogo
             tempo_restante = max(0, TEMPO_FASE - (pygame.time.get_ticks() - tempo_inicio) // 1000)
             
-            # Verifica se completou a fase
             if tempo_restante <= 0 and not pontos_ja_adicionados and menu:
-                pontuacao_total = pontuacao + 50  # 50 pontos por completar a fase
+                pontuacao_total = pontuacao + 50
                 menu.adicionar_pontos(pontuacao_total)
                 pontos_ja_adicionados = True
                 return True
@@ -59,9 +61,13 @@ def executar(tela, menu=None):
             # Eventos
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    if menu:
+                        menu.adicionar_pontos(pontuacao)
                     return False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
+                        if menu:
+                            menu.adicionar_pontos(pontuacao)
                         return True
                     if event.key == pygame.K_r and game_over:
                         return executar(tela, menu)
@@ -72,7 +78,7 @@ def executar(tela, menu=None):
             grupo_personagens.update(teclas)
             grupo_obstaculos.update()
 
-            # Verificação se saiu da tela (ADICIONADO igual fase 1)
+            # Verificação se saiu da tela
             if (personagem.rect.left <= 0 or personagem.rect.right >= 800 or 
                 personagem.rect.top <= 0 or personagem.rect.bottom >= 600):
                 game_over = True
@@ -98,8 +104,20 @@ def executar(tela, menu=None):
                 if pilula.pos_Y > 600:
                     pilulas.remove(pilula)
                 elif personagem.rect.colliderect(pilula.rect):
-                    personagem.aplicar_efeito_pilula()
-                    pontuacao += 60  # Adiciona 60 pontos por pílula coletada
+                    contador_pilulas += 1
+                    pontuacao += 5
+                    
+                    # Aplica efeitos graduais
+                    if contador_pilulas <= config["limite_pilulas_para_inverter"]:
+                        nova_velocidade = min(
+                            config["velocidade_maxima"],
+                            personagem.velocidade_padrao + 
+                            (contador_pilulas * config["bonus_velocidade_por_pilula"])
+                        )
+                        personagem.velocidade = nova_velocidade
+                    else:
+                        personagem.aplicar_efeito_pilula()
+                        
                     pilulas.remove(pilula)
 
             # Sistema do carro
@@ -110,16 +128,28 @@ def executar(tela, menu=None):
                 if carro.pos_X + carro.largura < 0 or not rua.visible:
                     carro = None
                 elif personagem.rect.colliderect(pygame.Rect(carro.pos_X, carro.pos_Y, carro.largura, carro.altura)):
+                    if menu:
+                        menu.adicionar_pontos(pontuacao)
                     game_over = True
 
             # Verifica colisões com obstáculos
             for obstaculo in grupo_obstaculos:
                 if personagem.rect.colliderect(obstaculo.rect):
                     if obstaculo.tipo == 'buraco':
+                        if menu:
+                            menu.adicionar_pontos(pontuacao)
                         game_over = True
                     else:
-                        personagem.velocidade = 2
-                        personagem.lento_timer = pygame.time.get_ticks()
+                        personagem.velocidade = max(1, personagem.velocidade_padrao - 2)
+                        personagem.lento_timer = pygame.time.get_ticks() + 1000
+
+            # Verifica se o efeito de redução de velocidade acabou
+            if not personagem.controles_invertidos and personagem.lento_timer and pygame.time.get_ticks() > personagem.lento_timer:
+                personagem.velocidade = personagem.velocidade_padrao + (
+                    min(contador_pilulas, config["limite_pilulas_para_inverter"]) * 
+                    config["bonus_velocidade_por_pilula"]
+                )
+                personagem.lento_timer = 0
 
             # Desenho
             tela.fill(config["cor_fundo"])
@@ -129,17 +159,20 @@ def executar(tela, menu=None):
             if carro: carro.desenhar(tela)
             for pilula in pilulas: pilula.desenhar(tela)
 
-            # UI - Informações na tela
+            # UI
             fonte = pygame.font.SysFont("Arial", 24)
             tela.blit(fonte.render(f"Tempo: {tempo_restante}s", True, (0, 0, 0)), (20, 20))
-            tela.blit(fonte.render(f"Pontos: {pontuacao}", True, (0, 0, 0)), (20, 50))  # Mostra pontos
+            tela.blit(fonte.render(f"Pontos: {pontuacao}", True, (0, 0, 0)), (20, 50))
+            tela.blit(fonte.render(f"Pílulas: {contador_pilulas}", True, (0, 0, 0)), (20, 80))
             
             if personagem.controles_invertidos:
                 t_efeito = max(0, (personagem.efeito_timer - pygame.time.get_ticks()) // 1000)
-                tela.blit(fonte.render(f"Efeito: {t_efeito}s", True, (255, 255, 0)), (20, 80))
+                tela.blit(fonte.render(f"Controles invertidos: {t_efeito}s", True, (255, 0, 0)), (20, 110))
+            
+            tela.blit(fonte.render(f"Velocidade: {personagem.velocidade}", True, (0, 0, 255)), (20, 140))
 
         else:
-            # Tela de Game Over (MODIFICADO para usar a mesma imagem da fase 1)
+            # Tela de Game Over
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: running = False
                 if event.type == pygame.KEYDOWN:
@@ -151,9 +184,10 @@ def executar(tela, menu=None):
             else:
                 tela.fill((0, 0, 0))
                 fonte = pygame.font.SysFont("Arial", 40)
-            
-            # Mostra pontuação final no game over
-            fonte_pontos = pygame.font.SysFont("Arial", 36)
+                tela.blit(fonte.render("GAME OVER - Pressione R para reiniciar", True, (255, 0, 0)), (100, 300))
+                fonte_pontos = pygame.font.SysFont("Arial", 36)
+                tela.blit(fonte_pontos.render(f"Pontuação final: {pontuacao}", True, (255, 255, 255)), (250, 350))
+                tela.blit(fonte_pontos.render(f"Pílulas coletadas: {contador_pilulas}", True, (255, 255, 255)), (250, 400))
 
         pygame.display.flip()
         clock.tick(60)

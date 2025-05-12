@@ -1,7 +1,7 @@
 import pygame
 import random
 from cenario.rua import Rua
-from personagens.Personagem import Personagem3,Vilao2
+from personagens.Personagem import Personagem3, Vilao2
 from cenario.obstaculos import Obstaculo
 from cenario.coletaveis import Dinheiro, Maquina
 from cenario.carro import Carro
@@ -15,29 +15,26 @@ def executar(tela, menu=None):
         "intervalo_maquina": 6000,
         "velocidade_dinheiro": 3,
         "velocidade_maquina": 3,
-        "perda_maquina": 15
+        "perda_maquina": 5
     }
     
     TEMPO_FASE = 2 * 5
     tempo_inicio = pygame.time.get_ticks()
     pontos_ja_adicionados = False
     pontuacao = 0
+    game_over = False
 
-    # Sistema de Game Over (ADICIONADO igual fase 1)
+    # Sistema de Game Over
     try:
         game_over_img = pygame.image.load("menu/imagens/gameover.png").convert_alpha()
         game_over_img = pygame.transform.scale(game_over_img, (800, 600))
     except:
         game_over_img = None
-    game_over = False
 
     # Inicialização de objetos
     rua = Rua(800, 600)
     personagem = Personagem3(400, 300)
-    vilao2 = Vilao2(700, 100) 
-
-    
-    
+    vilao2 = Vilao2(700, 100)
     carro = None
     dinheiros = []
     maquinas = []
@@ -67,14 +64,18 @@ def executar(tela, menu=None):
             # Tratamento de eventos
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    if menu:
+                        menu.adicionar_pontos(pontuacao)
                     return False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
+                        if menu:
+                            menu.adicionar_pontos(pontuacao)
                         return True
                     if event.key == pygame.K_r and game_over:
                         return executar(tela, menu)
 
-            # Verificação se saiu da tela (ADICIONADO igual fase 1)
+            # Verificação se saiu da tela
             if (personagem.rect.left <= 0 or personagem.rect.right >= 800 or 
                 personagem.rect.top <= 0 or personagem.rect.bottom >= 600):
                 game_over = True
@@ -114,7 +115,6 @@ def executar(tela, menu=None):
             grupo_obstaculos.update()
             vilao2.update(personagem)
 
-
             # Atualização de carro
             if rua.visible and carro is None:
                 carro = Carro(100, rua.y_pos + 20, config["velocidade"])
@@ -132,7 +132,7 @@ def executar(tela, menu=None):
                 if dinheiro.pos_Y > 600:
                     dinheiros.remove(dinheiro)
                 elif personagem.rect.colliderect(dinheiro.rect):
-                    pontuacao += 60
+                    pontuacao += 5
                     dinheiros.remove(dinheiro)
 
             # Atualização de máquinas
@@ -144,8 +144,8 @@ def executar(tela, menu=None):
                     pontuacao -= config["perda_maquina"]
                     maquinas.remove(maquina)
                     
-             # Verificação de colisões com agiota        
-            zona_colisao = personagem.rect.inflate(-65, -65)#diminui a area de colisão
+            # Verificação de colisões com agiota        
+            zona_colisao = personagem.rect.inflate(-65, -65)
             if vilao2.rect.colliderect(zona_colisao):
                 game_over = True
 
@@ -167,7 +167,6 @@ def executar(tela, menu=None):
             tela.fill(config["cor_fundo"])
             rua.desenhar(tela)
             vilao2.desenhar(tela)
-
             grupo_obstaculos.draw(tela)
             grupo_personagens.draw(tela)
             
@@ -185,9 +184,8 @@ def executar(tela, menu=None):
             cor_dinheiro = (255, 0, 0) if pontuacao < 0 else (0, 128, 0)
             tela.blit(fonte.render(f"Dinheiro: ${pontuacao}", True, cor_dinheiro), (20, 50))
             
-            
         else:
-            # Tela de Game Over (MODIFICADO para usar a mesma imagem da fase 1)
+            # Tela de Game Over
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -195,6 +193,8 @@ def executar(tela, menu=None):
                     if event.key == pygame.K_r:
                         return executar(tela, menu)
                     if event.key == pygame.K_ESCAPE:
+                        if menu:
+                            menu.adicionar_pontos(pontuacao)
                         return True
 
             if game_over_img:
@@ -203,6 +203,8 @@ def executar(tela, menu=None):
                 tela.fill((0, 0, 0))
                 fonte = pygame.font.SysFont("Arial", 40)
                 tela.blit(fonte.render("GAME OVER - Pressione R para reiniciar", True, (255, 0, 0)), (100, 300))
+                fonte_pontos = pygame.font.SysFont("Arial", 36)
+                tela.blit(fonte_pontos.render(f"Pontuação final: {pontuacao}", True, (255, 255, 255)), (250, 350))
 
         pygame.display.flip()
         clock.tick(60)
