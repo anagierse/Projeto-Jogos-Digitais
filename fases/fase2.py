@@ -23,6 +23,13 @@ def executar(tela, menu=None):
     pontuacao = 0
     contador_pilulas = 0
 
+    # Sistema de Game Over
+    try:
+        game_over_img = pygame.image.load("menu/imagens/gameover.png").convert_alpha()
+        game_over_img = pygame.transform.scale(game_over_img, (800, 600))
+    except:
+        game_over_img = None
+
     # Inicializa objetos
     rua = Rua(800, 600)
     personagem = Personagem2Modificado(400, 300)
@@ -46,7 +53,8 @@ def executar(tela, menu=None):
             tempo_restante = max(0, TEMPO_FASE - (pygame.time.get_ticks() - tempo_inicio) // 1000)
             
             if tempo_restante <= 0 and not pontos_ja_adicionados and menu:
-                menu.adicionar_pontos(pontuacao + 50)
+                pontuacao_total = pontuacao + 50
+                menu.adicionar_pontos(pontuacao_total)
                 pontos_ja_adicionados = True
                 return True
             
@@ -67,12 +75,15 @@ def executar(tela, menu=None):
             # Atualizações
             teclas = pygame.key.get_pressed()
             rua.atualizar(config["velocidade"])
-            
-            # Atualiza personagem - CORREÇÃO AQUI (removida a lógica de controles invertidos duplicada)
             grupo_personagens.update(teclas)
             grupo_obstaculos.update()
 
-            # Gera obstáculos - CORREÇÃO AQUI (garantir que obstáculos sejam adicionados)
+            # Verificação se saiu da tela
+            if (personagem.rect.left <= 0 or personagem.rect.right >= 800 or 
+                personagem.rect.top <= 0 or personagem.rect.bottom >= 600):
+                game_over = True
+
+            # Gera obstáculos
             obstaculo_timer += delta_time
             if obstaculo_timer > config["intervalo_obstaculos"]:
                 lado = 'esquerda' if random.random() < 0.5 else 'direita'
@@ -168,12 +179,15 @@ def executar(tela, menu=None):
                     if event.key == pygame.K_r: return executar(tela, menu)
                     if event.key == pygame.K_ESCAPE: return True
 
-            tela.fill((0, 0, 0))
-            fonte = pygame.font.SysFont("Arial", 40)
-            tela.blit(fonte.render("GAME OVER - Pressione R para reiniciar", True, (255, 0, 0)), (100, 300))
-            fonte_pontos = pygame.font.SysFont("Arial", 36)
-            tela.blit(fonte_pontos.render(f"Pontuação final: {pontuacao}", True, (255, 255, 255)), (250, 350))
-            tela.blit(fonte_pontos.render(f"Pílulas coletadas: {contador_pilulas}", True, (255, 255, 255)), (250, 400))
+            if game_over_img:
+                tela.blit(game_over_img, (0, 0))
+            else:
+                tela.fill((0, 0, 0))
+                fonte = pygame.font.SysFont("Arial", 40)
+                tela.blit(fonte.render("GAME OVER - Pressione R para reiniciar", True, (255, 0, 0)), (100, 300))
+                fonte_pontos = pygame.font.SysFont("Arial", 36)
+                tela.blit(fonte_pontos.render(f"Pontuação final: {pontuacao}", True, (255, 255, 255)), (250, 350))
+                tela.blit(fonte_pontos.render(f"Pílulas coletadas: {contador_pilulas}", True, (255, 255, 255)), (250, 400))
 
         pygame.display.flip()
         clock.tick(60)

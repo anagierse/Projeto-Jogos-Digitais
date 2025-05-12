@@ -19,7 +19,6 @@ def executar(tela, menu=None):
     pontuacao = 0
     game_over = False
 
-    # Sistema de Game Over - CORREÇÃO: Movido para antes do loop principal
     try:
         game_over_img = pygame.image.load("menu/imagens/gameover.png").convert_alpha()
         game_over_img = pygame.transform.scale(game_over_img, (800, 600))
@@ -30,7 +29,7 @@ def executar(tela, menu=None):
     personagem = Personagem1(400, 300)
     vilao = Vilao(600, 400)
     carro = None
-    
+
     pirulitos = []
     pirulito_timer = 0
     intervalo_pirulito = 3000
@@ -38,7 +37,7 @@ def executar(tela, menu=None):
     grupo_personagens = pygame.sprite.Group(personagem)
     grupo_viloes = pygame.sprite.Group(vilao)
     grupo_obstaculos = pygame.sprite.Group()
-    
+
     clock = pygame.time.Clock()
     obstaculo_timer = 0
     running = True
@@ -53,7 +52,7 @@ def executar(tela, menu=None):
                 menu.adicionar_pontos(pontuacao + 50)
                 pontos_ja_adicionados = True
                 return True
-            
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     if menu:
@@ -67,9 +66,8 @@ def executar(tela, menu=None):
                     if event.key == pygame.K_r and game_over:
                         return executar(tela, menu)
 
+            # Geração de obstáculos
             obstaculo_timer += delta_time
-            pirulito_timer += delta_time
-            
             if obstaculo_timer > config["intervalo_obstaculos"]:
                 tipo = random.choice(['poste', 'buraco', 'lixo'])
                 x = random.randint(50, 750)
@@ -77,12 +75,15 @@ def executar(tela, menu=None):
                 grupo_obstaculos.add(obstaculo)
                 obstaculo_timer = 0
 
+            # Geração de pirulitos
+            pirulito_timer += delta_time
             if pirulito_timer > intervalo_pirulito:
                 x_pos = random.randint(50, 750)
                 novo_pirulito = Pirulito(x_pos, -100)
                 pirulitos.append(novo_pirulito)
                 pirulito_timer = 0
 
+            # Atualização de pirulitos
             for pirulito in pirulitos[:]:
                 pirulito.pos_Y += config["velocidade_pirulito"]
                 pirulito.rect.y = pirulito.pos_Y
@@ -93,12 +94,18 @@ def executar(tela, menu=None):
                     pontuacao += 5
                     pirulitos.remove(pirulito)
 
+            # Atualizações gerais
             teclas = pygame.key.get_pressed()
             rua.atualizar(config["velocidade"])
             grupo_personagens.update(teclas)
             grupo_obstaculos.update()
             vilao.update(personagem)
 
+            # Verificação de queda fora da tela
+            if personagem.rect.bottom >= 600:
+                game_over = True
+
+            # Carro
             if rua.visible and carro is None:
                 carro = Carro(100, rua.y_pos + 20, config["velocidade"])
 
@@ -107,14 +114,11 @@ def executar(tela, menu=None):
                 if carro.pos_X + carro.largura < 0 or not rua.visible:
                     carro = None
                 if carro and personagem.rect.colliderect(pygame.Rect(carro.pos_X, carro.pos_Y, carro.largura, carro.altura)):
-                    if menu:
-                        menu.adicionar_pontos(pontuacao)
                     game_over = True
 
+            # Colisões com obstáculos
             for obstaculo in grupo_obstaculos:
                 if obstaculo.tipo == 'buraco' and personagem.rect.colliderect(obstaculo.rect):
-                    if menu:
-                        menu.adicionar_pontos(pontuacao)
                     game_over = True
                 elif obstaculo.tipo in ['poste', 'lixo'] and personagem.rect.colliderect(obstaculo.rect):
                     personagem.velocidade = 1
@@ -124,12 +128,12 @@ def executar(tela, menu=None):
                 personagem.velocidade = 3
                 personagem.lento_timer = 0
 
-            zona_colisao = personagem.rect.inflate(-50, -50)
+            # Colisão com vilão
+            zona_colisao = personagem.rect.inflate(-65, -65)
             if vilao.rect.colliderect(zona_colisao):
-                if menu:
-                    menu.adicionar_pontos(pontuacao)
                 game_over = True
-            
+
+            # Desenho na tela
             tela.fill(config["cor_fundo"])
             rua.desenhar(tela)
             grupo_obstaculos.draw(tela)
@@ -149,6 +153,7 @@ def executar(tela, menu=None):
             fonte_pontos = pygame.font.SysFont(None, 36)
             texto_pontos = fonte_pontos.render(f"Pirulitos: {pontuacao}", True, (0, 0, 0))
             tela.blit(texto_pontos, (20, 50))
+
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -157,9 +162,10 @@ def executar(tela, menu=None):
                     if event.key == pygame.K_r:
                         return executar(tela, menu)
                     if event.key == pygame.K_ESCAPE:
+                        if menu:
+                            menu.adicionar_pontos(pontuacao)
                         return True
 
-            # CORREÇÃO: Agora game_over_img está definida antes de ser usada
             if game_over_img:
                 tela.blit(game_over_img, (0, 0))
             else:
@@ -170,5 +176,5 @@ def executar(tela, menu=None):
 
         pygame.display.flip()
         clock.tick(60)
-    
+
     return False
