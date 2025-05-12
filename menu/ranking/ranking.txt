@@ -2,4 +2,3 @@ Ana,1200
 Carlos,900
 Maria,850
 João,800
-

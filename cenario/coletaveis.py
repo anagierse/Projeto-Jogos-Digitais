@@ -2,8 +2,8 @@ import pygame
 
 class Pirulito:
     def __init__(self, x_pos, y_pos):
-        self.largura = 40  # Tamanho fixo (ajuste conforme necessário)
-        self.altura = 80
+        self.largura = 60  # Tamanho fixo (ajuste conforme necessário)
+        self.altura = 60
         self.pos_X = x_pos  # Posição X fixa
         self.pos_Y = y_pos  # Posição Y fixa
         self.velocidade = 0  # Não se move mais
