@@ -2,8 +2,8 @@ import pygame
 
 class Carro:
     def __init__(self, largura, y_pos, velocidade_rua):
-        self.largura = 100
-        self.altura = 60
+        self.largura = 70
+        self.altura = 40
         self.pos_Y = y_pos
         self.pos_X = 800
         self.velocidade_horizontal = 8  # Velocidade para esquerda
@@ -11,7 +11,7 @@ class Carro:
         
         try:
             self.imagem_original = pygame.image.load('cenario/imagens/carroremo.png').convert_alpha()
-            self.imagem = pygame.transform.scale(self.imagem_original, (self.largura, self.altura))
+            self.imagem = pygame.transform.scale(self.imagem_original, (self.largura + 10, self.altura + 10))
         except:
             self.imagem = pygame.Surface((self.largura, self.altura))
             self.imagem.fill((255, 0, 0))

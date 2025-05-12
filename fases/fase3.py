@@ -15,16 +15,15 @@ def executar(tela, menu=None):
         "intervalo_maquina": 6000,
         "velocidade_dinheiro": 3,
         "velocidade_maquina": 3,
-        "perda_maquina": 15
+        "perda_maquina": 15  # Alterado de 15 para 5 (agora é pontuação negativa)
     }
     
-    TEMPO_FASE = 2 * 5
+    TEMPO_FASE = 2 * 60
     tempo_inicio = pygame.time.get_ticks()
     pontos_ja_adicionados = False
     pontuacao = 0
     game_over = False
 
-    # Inicialização de objetos
     rua = Rua(800, 600)
     personagem = Personagem3(400, 300)
     carro = None
@@ -33,7 +32,6 @@ def executar(tela, menu=None):
     dinheiro_timer = 0
     maquina_timer = 0
 
-    # Grupos de sprites
     grupo_personagens = pygame.sprite.Group(personagem)
     grupo_obstaculos = pygame.sprite.Group()
 
@@ -47,28 +45,28 @@ def executar(tela, menu=None):
         tempo_restante = max(0, TEMPO_FASE - tempo_decorrido)
         
         if not game_over:
-            # Verificação de término do tempo
             if tempo_restante <= 0 and not pontos_ja_adicionados and menu:
                 menu.adicionar_pontos(50 + pontuacao)
                 pontos_ja_adicionados = True
                 return True
             
-            # Tratamento de eventos
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    if menu:
+                        menu.adicionar_pontos(pontuacao)
                     return False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
+                        if menu:
+                            menu.adicionar_pontos(pontuacao)
                         return True
                     if event.key == pygame.K_r and game_over:
                         return executar(tela, menu)
 
-            # Atualizações de tempo
             obstaculo_timer += delta_time
             dinheiro_timer += delta_time
             maquina_timer += delta_time
 
-            # Geração de obstáculos
             if obstaculo_timer > config["intervalo_obstaculos"]:
                 tipo = random.choice(['poste', 'buraco', 'lixo'])
                 lado = random.choice(['esquerda', 'direita'])
@@ -79,25 +77,21 @@ def executar(tela, menu=None):
                     grupo_obstaculos.add(obstaculo)
                     obstaculo_timer = 0
 
-            # Geração de dinheiro
             if dinheiro_timer > config["intervalo_dinheiro"]:
                 x_pos = random.randint(50, 750)
                 dinheiros.append(Dinheiro(x_pos, -100))
                 dinheiro_timer = 0
 
-            # Geração de máquinas
             if maquina_timer > config["intervalo_maquina"]:
                 x_pos = random.randint(50, 750)
                 maquinas.append(Maquina(x_pos, -100))
                 maquina_timer = 0
 
-            # Atualização de objetos
             teclas = pygame.key.get_pressed()
             rua.atualizar(config["velocidade"])
             grupo_personagens.update(teclas)
             grupo_obstaculos.update()
 
-            # Atualização de carro
             if rua.visible and carro is None:
                 carro = Carro(100, rua.y_pos + 20, config["velocidade"])
 
@@ -106,18 +100,18 @@ def executar(tela, menu=None):
                 if carro.pos_X + carro.largura < 0 or not rua.visible:
                     carro = None
                 if carro and personagem.rect.colliderect(pygame.Rect(carro.pos_X, carro.pos_Y, carro.largura, carro.altura)):
+                    if menu:
+                        menu.adicionar_pontos(pontuacao)
                     game_over = True
 
-            # Atualização de dinheiros
             for dinheiro in dinheiros[:]:
                 dinheiro.atualizar()
                 if dinheiro.pos_Y > 600:
                     dinheiros.remove(dinheiro)
                 elif personagem.rect.colliderect(dinheiro.rect):
-                    pontuacao += 60
+                    pontuacao += 5  # Alterado de 60 para 5
                     dinheiros.remove(dinheiro)
 
-            # Atualização de máquinas
             for maquina in maquinas[:]:
                 maquina.atualizar()
                 if maquina.pos_Y > 600:
@@ -126,21 +120,20 @@ def executar(tela, menu=None):
                     pontuacao -= config["perda_maquina"]
                     maquinas.remove(maquina)
 
-            # Verificação de colisões com obstáculos
             for obstaculo in grupo_obstaculos:
                 if personagem.rect.colliderect(obstaculo.rect):
                     if obstaculo.tipo == 'buraco':
+                        if menu:
+                            menu.adicionar_pontos(pontuacao)
                         game_over = True
                     else:
                         personagem.velocidade = 3
                         personagem.lento_timer = pygame.time.get_ticks()
 
-            # Restaura velocidade
             if personagem.lento_timer and pygame.time.get_ticks() - personagem.lento_timer > 1000:
                 personagem.velocidade = 7
                 personagem.lento_timer = 0
 
-            # Renderização
             tela.fill(config["cor_fundo"])
             rua.desenhar(tela)
             grupo_obstaculos.draw(tela)
@@ -153,16 +146,13 @@ def executar(tela, menu=None):
             if carro:
                 carro.desenhar(tela)
 
-            # UI
             fonte = pygame.font.SysFont("Arial", 24)
             tela.blit(fonte.render(f"Tempo: {tempo_restante}s", True, (0, 0, 0)), (20, 20))
             
             cor_dinheiro = (255, 0, 0) if pontuacao < 0 else (0, 128, 0)
             tela.blit(fonte.render(f"Dinheiro: ${pontuacao}", True, cor_dinheiro), (20, 50))
             
-            
         else:
-            # Tela de Game Over
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -172,7 +162,6 @@ def executar(tela, menu=None):
                     if event.key == pygame.K_ESCAPE:
                         return True
 
-            # Tente carregar a imagem de game over
             try:
                 game_over_img = pygame.image.load("menu/imagens/gameover.png").convert_alpha()
                 game_over_img = pygame.transform.scale(game_over_img, (800, 600))
