@@ -116,9 +116,15 @@ class Personagem2Modificado(Personagem2):
             self.rect.y += self.velocidade
 
         # Mantém dentro da tela
-        self.rect.x = max(0, min(self.rect.x, 800 - self.rect.width))
-        self.rect.y = max(0, min(self.rect.y, 600 - self.rect.height))
-
+         if self.rect.left < -30:
+            self.rect.left = -30
+        if self.rect.right > 830:
+            self.rect.right = 830
+        if self.rect.top < -10:
+            self.rect.top = -10
+        if self.rect.bottom > 610:
+            self.rect.bottom = 610
+            
     def aplicar_efeito_pilula(self):
         self.velocidade += 2  # Aumenta a velocidade
         self.controles_invertidos = True
