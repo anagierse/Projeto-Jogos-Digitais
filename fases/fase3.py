@@ -123,7 +123,7 @@ def executar(tela, menu=None):
                 if carro.pos_X + carro.largura < 0 or not rua.visible:
                     carro = None
                 if carro and personagem.rect.colliderect(
-                    pygame.Rect(carro.pos_X, carro.pos_Y, carro.largura, carro.altura).inflate(75, 75)):
+                    pygame.Rect(carro.pos_X, carro.pos_Y, carro.largura, carro.altura).inflate(-75, -75)):
                     game_over = True
 
             # Atualização de dinheiros

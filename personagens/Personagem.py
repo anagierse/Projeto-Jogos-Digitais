@@ -116,7 +116,7 @@ class Personagem2Modificado(Personagem2):
             self.rect.y += self.velocidade
 
         # Mantém dentro da tela
-         if self.rect.left < -30:
+        if self.rect.left < -30:
             self.rect.left = -30
         if self.rect.right > 830:
             self.rect.right = 830
