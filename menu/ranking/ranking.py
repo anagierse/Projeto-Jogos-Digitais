@@ -30,8 +30,8 @@ class Ranking:
         self.ranking_data.append((nome_jogador, pontos))
         # Ordena do maior para o menor
         self.ranking_data.sort(key=lambda x: x[1], reverse=True)
-        # Mantém apenas as top 10 pontuações
-        self.ranking_data = self.ranking_data[:10]
+        # Mantém apenas as top 5 pontuações
+        self.ranking_data = self.ranking_data[:5]
         
         # Salva no arquivo
         with open(self.caminho, "w", encoding="utf-8") as f:
