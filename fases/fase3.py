@@ -76,8 +76,7 @@ def executar(tela, menu=None):
                         return executar(tela, menu)
 
             # Verificação se saiu da tela
-            if (personagem.rect.left <= 0 or personagem.rect.right >= 800 or 
-                personagem.rect.top <= 0 or personagem.rect.bottom >= 600):
+            if personagem.rect.bottom >= 600:
                 game_over = True
 
             # Atualizações de tempo

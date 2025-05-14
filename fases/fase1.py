@@ -24,6 +24,7 @@ def executar(tela, menu=None):
         game_over_img = pygame.transform.scale(game_over_img, (800, 600))
     except:
         game_over_img = None
+        # Inicializa objetos
 
     rua = Rua(800, 600)
     personagem = Personagem1(400, 300)
