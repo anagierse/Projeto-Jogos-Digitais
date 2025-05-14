@@ -126,7 +126,8 @@ def executar(tela, menu=None):
                 carro.atualizar()
                 if carro.pos_X + carro.largura < 0 or not rua.visible:
                     carro = None
-                elif personagem.rect.colliderect(pygame.Rect(carro.pos_X, carro.pos_Y, carro.largura, carro.altura)):
+                elif personagem.rect.colliderect(
+                        pygame.Rect(carro.pos_X, carro.pos_Y, carro.largura, carro.altura).inflate(-75, -75)
                     if menu:
                         menu.adicionar_pontos(pontuacao)
                     game_over = True
