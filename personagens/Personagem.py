@@ -1,6 +1,13 @@
 import pygame
 import sys
 
+def calcular_tamanho_proporcional(imagem_path, nova_altura):
+    imagem = pygame.image.load(imagem_path).convert_alpha()
+    largura_original, altura_original = imagem.get_size()
+    proporcao = nova_altura / altura_original
+    nova_largura = int(largura_original * proporcao)
+    return (nova_largura, nova_altura)
+
 class PersonagemBase(pygame.sprite.Sprite):
     def __init__(self, imagem_path, x, y, teclas_controle, tamanho):
         super().__init__()
@@ -25,14 +32,8 @@ class PersonagemBase(pygame.sprite.Sprite):
                     self.rect.y += self.velocidade
 
         # Limites da tela
-        if self.rect.left < -30:
-            self.rect.left = -30
-        if self.rect.right > 830:
-            self.rect.right = 830
-        if self.rect.top < -10:
-            self.rect.top = -10
-        if self.rect.bottom > 610:
-            self.rect.bottom = 610
+            self.rect.x = max(0, min(self.rect.x, 800 - self.rect.width))
+            self.rect.y = max(0, min(self.rect.y, 600 - self.rect.height))
 
 
 
@@ -47,8 +48,9 @@ class Personagem1(PersonagemBase):
             "cima": [pygame.K_w, pygame.K_UP],
             "baixo": [pygame.K_s, pygame.K_DOWN]
         }
-        tamanho = (110, 120)
-        super().__init__('personagens/imagens/personagemcriança.png', x, y, teclas_controle, tamanho)
+        caminho = 'personagens/imagens/personagemcriança.png'
+        tamanho = calcular_tamanho_proporcional(caminho, 105)
+        super().__init__(caminho, x, y, teclas_controle, tamanho)
 
 class Personagem2(PersonagemBase):
     def __init__(self, x, y):
@@ -58,8 +60,10 @@ class Personagem2(PersonagemBase):
             "cima": [pygame.K_w, pygame.K_UP],
             "baixo": [pygame.K_s, pygame.K_DOWN]
         }
-        tamanho = (150, 150)
-        super().__init__('personagens/imagens/personagemadolescente.png', x, y, teclas_controle, tamanho)
+        caminho = 'personagens/imagens/personagemadolescente.png'
+        tamanho = calcular_tamanho_proporcional(caminho, 120)
+        super().__init__(caminho, x, y, teclas_controle, tamanho)
+        
         self.velocidade = 5
         self.lento_timer = 0
 
@@ -116,14 +120,8 @@ class Personagem2Modificado(Personagem2):
             self.rect.y += self.velocidade
 
         # Mantém dentro da tela
-        if self.rect.left < -30:
-            self.rect.left = -30
-        if self.rect.right > 830:
-            self.rect.right = 830
-        if self.rect.top < -10:
-            self.rect.top = -10
-        if self.rect.bottom > 610:
-            self.rect.bottom = 610
+        self.rect.x = max(0, min(self.rect.x, 800 - self.rect.width))
+        self.rect.y = max(0, min(self.rect.y, 600 - self.rect.height))
             
     def aplicar_efeito_pilula(self):
         self.velocidade += 2  # Aumenta a velocidade
@@ -138,14 +136,17 @@ class Personagem3(PersonagemBase):
             "cima": [pygame.K_w, pygame.K_UP],
             "baixo": [pygame.K_s, pygame.K_DOWN]
         }
-        tamanho = (150, 150)
-        super().__init__('personagens/imagens/personagemadulto.png', x, y, teclas_controle, tamanho)
+        caminho = 'personagens/imagens/personagemadulto.png'
+        tamanho = calcular_tamanho_proporcional(caminho, 130)
+        super().__init__(caminho, x, y, teclas_controle, tamanho)
 
 class Vilao(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.image.load('personagens/imagens/homemdosaco.png')
-        self.image = pygame.transform.scale(self.image, (120, 150))
+        caminho = 'personagens/imagens/homemdosaco.png'
+        tamanho = calcular_tamanho_proporcional(caminho, 120)
+        self.image = pygame.image.load(caminho).convert_alpha()
+        self.image = pygame.transform.scale(self.image, tamanho)
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         self.velocidade = 0.6 # velocidade do homem do saco
@@ -161,14 +162,8 @@ class Vilao(pygame.sprite.Sprite):
         elif personagem.rect.centery < self.rect.centery:
             self.rect.y -= self.velocidade
 
-        if self.rect.left < -30:
-            self.rect.left = -30
-        if self.rect.right > 830:
-            self.rect.right = 830
-        if self.rect.top < -10:
-            self.rect.top = -10
-        if self.rect.bottom > 610:
-            self.rect.bottom = 610
+        self.rect.x = max(0, min(self.rect.x, 800 - self.rect.width))
+        self.rect.y = max(0, min(self.rect.y, 600 - self.rect.height))
 
     def desenhar(self, display):
         display.blit(self.image, self.rect.topleft)
@@ -177,8 +172,10 @@ class Vilao(pygame.sprite.Sprite):
 class Vilao2(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.image.load('personagens/imagens/agiota.png')  
-        self.image = pygame.transform.scale(self.image, (130, 160))  
+        caminho = 'personagens/imagens/agiota.png'
+        tamanho = calcular_tamanho_proporcional(caminho, 140)
+        self.image = pygame.image.load(caminho).convert_alpha()
+        self.image = pygame.transform.scale(self.image, tamanho)
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         self.velocidade = 0.6  
@@ -196,14 +193,8 @@ class Vilao2(pygame.sprite.Sprite):
             self.rect.y -= self.velocidade
 
         # Limites da tela
-        if self.rect.left < -30:
-            self.rect.left = -30
-        if self.rect.right > 830:
-            self.rect.right = 830
-        if self.rect.top < -10:
-            self.rect.top = -10
-        if self.rect.bottom > 610:
-            self.rect.bottom = 610
+        self.rect.x = max(0, min(self.rect.x, 800 - self.rect.width))
+        self.rect.y = max(0, min(self.rect.y, 600 - self.rect.height))
 
     def desenhar(self, display):
         display.blit(self.image, self.rect.topleft)
