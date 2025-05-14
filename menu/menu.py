@@ -2,6 +2,7 @@ import pygame
 import os
 from menu.ranking.ranking import Ranking
 from quiz.quiz import executar_quiz
+import textwrap
 
 
 class Menu:
@@ -9,7 +10,7 @@ class Menu:
         self.tela = tela
         pygame.font.init()
         self.fonte = pygame.font.SysFont("Comic Sans MS", 40)
-        self.fonte_pequena = pygame.font.SysFont("Comic Sans MS", 25)
+        self.fonte_pequena = pygame.font.SysFont("Comic Sans MS", 12)
         self.opcoes_principal = ["Jogar", "Sobre o Jogo", "Ranking", "Quiz", "Sair"]
         self.opcoes_fases = ["Fase 1", "Fase 2", "Fase 3", "Voltar"]
         self.estado = "principal"
@@ -24,6 +25,9 @@ class Menu:
         else:
             self.imagem_fundo = pygame.Surface(tela.get_size())
             self.imagem_fundo.fill((0, 0, 0))
+        
+        self.fundo_transparente = pygame.Surface((750, 550), pygame.SRCALPHA)  # Tamanho ajustável
+        self.fundo_transparente.fill((0, 50, 255, 128))
         
         # Registra novo jogador
         self.jogador = self.registrar_novo_jogador()
@@ -94,22 +98,47 @@ class Menu:
         self.tela.blit(self.imagem_fundo, (0, 0))
 
         if self.estado == "sobre":
+        # Título
             texto_titulo = self.fonte.render("Sobre o Jogo", True, (255, 255, 0))
-            rect_titulo = texto_titulo.get_rect(center=(400, 100))
-            self.tela.blit(texto_titulo, rect_titulo)
+            rect_titulo = texto_titulo.get_rect(center=(self.tela.get_width() // 2, 50))
+            self.tela.blit(self.fundo_transparente, (15, 40))
 
-            linhas_info = [
-                "Colocar aqui sobre o jogo",
-                "ESC para voltar ao menu",
-                "",
-                "Clique para voltar"
-            ]
+            # Texto longo sobre o jogo
+            texto_longo = (
+                "Infância:\n"
+                "Charlie Brown sempre foi uma criança alegre e curiosa, querendo explorar o mundo e as curiosidades que nele existem."
+                " Todos os dias, volta para casa de sua escola sozinho, porém sua mãe sempre o avisa dos perigos que estão presentes na rua,  sequestradores,para traficá-las ou vender seus órgãos no mercado negro."
+                "Todo dia, Charlie enfrenta esses perigos, para chegar em casa são e salvo.\n"
+                "Adolescência:\n"
+                "Após a morte de sua mãe Charlie, não soube lidar bem com o luto, estando numa idade onde as pessoas costumam começar a experimentar coisas novas, acabou entrando no mundo das drogas com colegas do ensino médio, o sentimento de poder e o fato de temporariamente esquecer de sua mãe por algum tempo é o que mais influência no contínuo vício e consumo das drogas.\n"
+                "Adulta:\n"
+                "Apesar de sua superação com as drogas, na fase adulta, um novo vício surgiu para suprir o vazio que sua mãe deixara, o dinheiro, mesmo tendo um trabalho que paga muito bem, rotineiramente o gasta em máquinas de apostas, e até pedir dinheiro com agiotas para poder apostar, fazendo os agiotas cobrarem sua dívida da forma que for necessário."
+            )
 
-            for i, linha in enumerate(linhas_info):
-                texto = self.fonte_pequena.render(linha, True, (255, 255, 255))
-                rect = texto.get_rect(center=(400, 200 + i * 40))
-                self.tela.blit(texto, rect)
+            # Configurações de quebra de texto
+            wrapper = textwrap.TextWrapper(width=125)  # Ajuste o número de caracteres por linha
+            linhas_quebradas = []
+            for paragrafo in texto_longo.split("\n"):
+                linhas_quebradas.extend(wrapper.wrap(paragrafo))
+                linhas_quebradas.append("")  # Adiciona espaço entre parágrafos
+
+            # Renderiza cada linha
+            y_pos = 100
+            for linha in linhas_quebradas:
+                if linha.strip() == "":
+                    y_pos += 20  # Espaço entre parágrafos
+                else:
+                    texto_renderizado = self.fonte_pequena.render(linha, True, (255, 255, 255))
+                    self.tela.blit(texto_renderizado, (15, y_pos))
+                    y_pos += 30  # Espaçamento entre linhas
+
+            # Botão "Voltar" (opcional)
+            texto_voltar = self.fonte_pequena.render(" ", True, (255, 255, 0))
+            rect_voltar = texto_voltar.get_rect(center=(self.tela.get_width() // 2, self.tela.get_height() - 50))
+            self.tela.blit(texto_voltar, rect_voltar)
+
         else:
+            # Renderiza os botões do menu principal ou de fases
             for i, (texto, rect, opcao) in enumerate(self.botoes):
                 cor = (255, 255, 255) if i != self.selecionado else (255, 255, 0)
                 texto = self.fonte.render(opcao, True, cor)
