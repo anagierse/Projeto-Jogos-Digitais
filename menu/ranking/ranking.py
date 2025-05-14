@@ -60,7 +60,7 @@ class Ranking:
             titulo = self.fonte_titulo.render("RANKING", True, (255, 255, 0))
             self.tela.blit(titulo, (400 - titulo.get_width()//2, 120))
             
-            for i, (nome, pontos) in enumerate(self.ranking_data[:10]):
+            for i, (nome, pontos) in enumerate(self.ranking_data[:5]):
                 y = 200 + i * 40        
                 posicao = self.fonte_itens.render(f"{i+1}º", True, (255, 255, 255))
                 jogador = self.fonte_itens.render(nome, True, (255, 255, 255))
