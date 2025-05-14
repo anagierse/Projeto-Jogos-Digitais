@@ -6,3 +6,9 @@ João,800
 Victor,0
 
 sos,30
+
+ana,30
+NA,0
+
+ana,0
+ana,0

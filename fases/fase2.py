@@ -29,6 +29,13 @@ def executar(tela, menu=None):
         game_over_img = pygame.transform.scale(game_over_img, (800, 600))
     except:
         game_over_img = None
+    
+    try:
+        calcada_img = pygame.image.load("fases/imagens/calcada.png").convert_alpha()
+        calcada_img = pygame.transform.scale(calcada_img, (800, 600))
+    except:
+        calcada_img = None
+        print("Erro ao carregar imagem da calçada")
 
     # Inicializa objetos
     rua = Rua(800, 600)
@@ -50,6 +57,10 @@ def executar(tela, menu=None):
         
         if not game_over:
             # Lógica do jogo
+            if calcada_img:
+                tela.blit(calcada_img, (0, 0))  # Desenha a calçada como fundo
+            else:
+                tela.fill(config["cor_fundo"])
             tempo_restante = max(0, TEMPO_FASE - (pygame.time.get_ticks() - tempo_inicio) // 1000)
             
             if tempo_restante <= 0 and not pontos_ja_adicionados and menu:
@@ -150,7 +161,6 @@ def executar(tela, menu=None):
                 personagem.lento_timer = 0
 
             # Desenho
-            tela.fill(config["cor_fundo"])
             rua.desenhar(tela)
             grupo_obstaculos.draw(tela)
             grupo_personagens.draw(tela)
