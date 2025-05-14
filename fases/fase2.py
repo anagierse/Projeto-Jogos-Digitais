@@ -16,7 +16,7 @@ def executar(tela, menu=None):
         "bonus_velocidade_por_pilula": 1,
         "velocidade_maxima": 8
     }
-    TEMPO_FASE = 2 * 60
+    TEMPO_FASE = 1 * 60
     tempo_inicio = pygame.time.get_ticks()
     pontos_ja_adicionados = False
     game_over = False
@@ -36,6 +36,13 @@ def executar(tela, menu=None):
     except:
         calcada_img = None
         print("Erro ao carregar imagem da calçada")
+    try:
+        vencedor_img = pygame.image.load("fases/imagens/vencedor.png").convert_alpha()
+        vencedor_img = pygame.transform.scale(vencedor_img, (800, 600))
+    except:
+        vencedor_img = None
+        print("Erro ao carregar imagem de vencedor")
+
 
     # Inicializa objetos
     rua = Rua(800, 600)
@@ -43,6 +50,7 @@ def executar(tela, menu=None):
     carro = None
     pilulas = []
     pilula_timer = 0
+    vitoria = False
 
     # Grupos de sprites
     grupo_personagens = pygame.sprite.Group(personagem)
@@ -67,7 +75,8 @@ def executar(tela, menu=None):
                 pontuacao_total = pontuacao + 50
                 menu.adicionar_pontos(pontuacao_total)
                 pontos_ja_adicionados = True
-                return True
+                vitoria = True
+                game_over = True
             
             # Eventos
             for event in pygame.event.get():
@@ -186,17 +195,24 @@ def executar(tela, menu=None):
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r: return executar(tela, menu)
                     if event.key == pygame.K_ESCAPE: return True
+            if vitoria:
+                if vencedor_img:
+                    tela.blit(vencedor_img, (0, 0))
+                else:
+                    tela.fill((0, 0, 0))
+                    fonte = pygame.font.SysFont("Arial", 40)
+                    texto = fonte.render("VOCÊ VENCEU! Pressione R para reiniciar", True, (0, 255, 0))
+                    tela.blit(texto, (100, 300))
+            elif game_over:
+                if game_over_img:
+                    tela.blit(game_over_img, (0, 0))
+                else:
+                    tela.fill((0, 0, 0))
+                    fonte = pygame.font.SysFont("Arial", 40)
+                    texto = fonte.render("GAME OVER - Pressione R para reiniciar", True, (255, 0, 0))
+                    tela.blit(texto, (100, 300))
 
-            if game_over_img:
-                tela.blit(game_over_img, (0, 0))
-            else:
-                tela.fill((0, 0, 0))
-                fonte = pygame.font.SysFont("Arial", 40)
-                tela.blit(fonte.render("GAME OVER - Pressione R para reiniciar", True, (255, 0, 0)), (100, 300))
-                fonte_pontos = pygame.font.SysFont("Arial", 36)
-                tela.blit(fonte_pontos.render(f"Pontuação final: {pontuacao}", True, (255, 255, 255)), (250, 350))
-                tela.blit(fonte_pontos.render(f"Pílulas coletadas: {contador_pilulas}", True, (255, 255, 255)), (250, 400))
-
+          
         pygame.display.flip()
         clock.tick(60)
     

@@ -18,7 +18,7 @@ def executar(tela, menu=None):
         "perda_maquina": 5
     }
     
-    TEMPO_FASE = 2 * 5
+    TEMPO_FASE = 1 * 5
     tempo_inicio = pygame.time.get_ticks()
     pontos_ja_adicionados = False
     pontuacao = 0
@@ -36,6 +36,13 @@ def executar(tela, menu=None):
     except:
         calcada_img = None
         print("Erro ao carregar imagem da calçada")
+    try:
+        vencedor_img = pygame.image.load("fases/imagens/vencedor.png").convert_alpha()
+        vencedor_img = pygame.transform.scale(vencedor_img, (800, 600))
+    except:
+        vencedor_img = None
+        print("Erro ao carregar imagem de vencedor")
+
     # Inicialização de objetos
     rua = Rua(800, 600)
     personagem = Personagem3(400, 300)
@@ -45,6 +52,8 @@ def executar(tela, menu=None):
     maquinas = []
     dinheiro_timer = 0
     maquina_timer = 0
+    vitoria = False
+
 
     # Grupos de sprites
     grupo_personagens = pygame.sprite.Group(personagem)
@@ -68,7 +77,8 @@ def executar(tela, menu=None):
             if tempo_restante <= 0 and not pontos_ja_adicionados and menu:
                 menu.adicionar_pontos(50 + pontuacao)
                 pontos_ja_adicionados = True
-                return True
+                vitoria = True
+                game_over = True
             
             # Tratamento de eventos
             for event in pygame.event.get():
@@ -204,16 +214,23 @@ def executar(tela, menu=None):
                         if menu:
                             menu.adicionar_pontos(pontuacao)
                         return True
-
-            if game_over_img:
-                tela.blit(game_over_img, (0, 0))
-            else:
-                tela.fill((0, 0, 0))
-                fonte = pygame.font.SysFont("Arial", 40)
-                tela.blit(fonte.render("GAME OVER - Pressione R para reiniciar", True, (255, 0, 0)), (100, 300))
-                fonte_pontos = pygame.font.SysFont("Arial", 36)
-                tela.blit(fonte_pontos.render(f"Pontuação final: {pontuacao}", True, (255, 255, 255)), (250, 350))
-
+            if vitoria:
+                if vencedor_img:
+                    tela.blit(vencedor_img, (0, 0))
+                else:
+                    tela.fill((0, 0, 0))
+                    fonte = pygame.font.SysFont("Arial", 40)
+                    texto = fonte.render("VOCÊ VENCEU! Pressione R para reiniciar", True, (0, 255, 0))
+                    tela.blit(texto, (100, 300))
+            elif game_over:
+                if game_over_img:
+                    tela.blit(game_over_img, (0, 0))
+                else:
+                    tela.fill((0, 0, 0))
+                    fonte = pygame.font.SysFont("Arial", 40)
+                    texto = fonte.render("GAME OVER - Pressione R para reiniciar", True, (255, 0, 0))
+                    tela.blit(texto, (100, 300))
+           
         pygame.display.flip()
         clock.tick(60)
     

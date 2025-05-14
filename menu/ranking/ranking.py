@@ -21,7 +21,9 @@ class Ranking:
         try:
             with open(self.caminho, "r", encoding="utf-8") as f:
                 linhas = [linha.strip().split(",") for linha in f if linha.strip()]
-                return [(nome, int(pontos)) for nome, pontos in linhas]
+                dados = [(nome, int(pontos)) for nome, pontos in linhas]
+                dados.sort(key=lambda x: x[1], reverse=True)
+                return dados[:5] 
         except (FileNotFoundError, ValueError):
             return []
 
