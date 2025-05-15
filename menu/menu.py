@@ -17,7 +17,6 @@ class Menu:
         self.selecionado = 0
         self.botoes = []
         
-        # Carrega imagem de fundo
         caminho_fundo = os.path.join("menu", "imagens", "fundomenu.png")
         if os.path.exists(caminho_fundo):
             self.imagem_fundo = pygame.image.load(caminho_fundo).convert()
@@ -26,10 +25,9 @@ class Menu:
             self.imagem_fundo = pygame.Surface(tela.get_size())
             self.imagem_fundo.fill((0, 0, 0))
         
-        self.fundo_transparente = pygame.Surface((750, 550), pygame.SRCALPHA)  # Tamanho ajustável
+        self.fundo_transparente = pygame.Surface((750, 550), pygame.SRCALPHA)
         self.fundo_transparente.fill((0, 50, 255, 128))
         
-        # Registra novo jogador
         self.jogador = self.registrar_novo_jogador()
 
     def executar(self):
@@ -61,6 +59,10 @@ class Menu:
                         return "Sair"
                     elif escolha in ["Fase 1", "Fase 2", "Fase 3"]:
                         return escolha
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        return "Sair"
 
             self.desenhar()
             pygame.display.flip()
@@ -98,12 +100,10 @@ class Menu:
         self.tela.blit(self.imagem_fundo, (0, 0))
 
         if self.estado == "sobre":
-        # Título
             texto_titulo = self.fonte.render("Sobre o Jogo", True, (255, 255, 0))
             rect_titulo = texto_titulo.get_rect(center=(self.tela.get_width() // 2, 50))
             self.tela.blit(self.fundo_transparente, (15, 40))
 
-            # Texto longo sobre o jogo
             texto_longo = (
                 "Infância:\n"
                 "Charlie Brown sempre foi uma criança alegre e curiosa, querendo explorar o mundo e as curiosidades que nele existem."
@@ -115,34 +115,31 @@ class Menu:
                 "Apesar de sua superação com as drogas, na fase adulta, um novo vício surgiu para suprir o vazio que sua mãe deixara, o dinheiro, mesmo tendo um trabalho que paga muito bem, rotineiramente o gasta em máquinas de apostas, e até pedir dinheiro com agiotas para poder apostar, fazendo os agiotas cobrarem sua dívida da forma que for necessário."
             )
 
-            # Configurações de quebra de texto
-            wrapper = textwrap.TextWrapper(width=125)  # Ajuste o número de caracteres por linha
+            wrapper = textwrap.TextWrapper(width=125)
             linhas_quebradas = []
             for paragrafo in texto_longo.split("\n"):
                 linhas_quebradas.extend(wrapper.wrap(paragrafo))
-                linhas_quebradas.append("")  # Adiciona espaço entre parágrafos
+                linhas_quebradas.append("")
 
-            # Renderiza cada linha
             y_pos = 100
             for linha in linhas_quebradas:
                 if linha.strip() == "":
-                    y_pos += 20  # Espaço entre parágrafos
+                    y_pos += 20
                 else:
                     texto_renderizado = self.fonte_pequena.render(linha, True, (255, 255, 255))
                     self.tela.blit(texto_renderizado, (15, y_pos))
-                    y_pos += 30  # Espaçamento entre linhas
+                    y_pos += 30
 
-            # Botão "Voltar" (opcional)
             texto_voltar = self.fonte_pequena.render(" ", True, (255, 255, 0))
             rect_voltar = texto_voltar.get_rect(center=(self.tela.get_width() // 2, self.tela.get_height() - 50))
             self.tela.blit(texto_voltar, rect_voltar)
 
         else:
-            # Renderiza os botões do menu principal ou de fases
             for i, (texto, rect, opcao) in enumerate(self.botoes):
                 cor = (255, 255, 255) if i != self.selecionado else (255, 255, 0)
                 texto = self.fonte.render(opcao, True, cor)
                 self.tela.blit(texto, rect)
+
     def registrar_novo_jogador(self):
         nome = ""
         registrado = False
@@ -154,21 +151,16 @@ class Menu:
                     return ""
                 if evento.type == pygame.KEYDOWN:
                     if evento.key == pygame.K_RETURN and nome:
-                        # Salva o nome do jogador
                         with open("menu/jogador.txt", "w") as arquivo:
                             arquivo.write(nome)
-                        
-                        # Adiciona ao ranking com 0 pontos
                         with open("menu/ranking/ranking.txt", "a") as arquivo_ranking:
                             arquivo_ranking.write(f"\n{nome},0")
-                        
                         registrado = True
                     elif evento.key == pygame.K_BACKSPACE:
                         nome = nome[:-1]
                     else:
                         nome += evento.unicode
 
-            # Renderização da tela de registro
             self.tela.fill((0, 0, 0))
             texto_instrucao = self.fonte.render("Digite seu nome e pressione ENTER:", True, (255, 255, 255))
             texto_nome = self.fonte.render(nome, True, (255, 255, 255))
@@ -177,9 +169,8 @@ class Menu:
             pygame.display.flip()
 
         return nome
-    
+
     def adicionar_pontos(self, pontos):
-        """Adiciona pontos ao jogador atual no arquivo ranking.txt"""
         try:
             with open("menu/ranking/ranking.txt", "r+", encoding="utf-8") as f:
                 linhas = f.readlines()
