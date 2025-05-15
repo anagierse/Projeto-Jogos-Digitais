@@ -3,15 +3,11 @@ import sys
 import os
 
 def executar_quiz():
-    # Inicializa o pygame
     pygame.init()
-
-    # Configurações da tela
     LARGURA, ALTURA = 800, 600
     tela = pygame.display.set_mode((LARGURA, ALTURA))
     pygame.display.set_caption("Quiz - Jornada da Vida")
 
-    # Cores
     BRANCO = (255, 255, 255)
     PRETO = (0, 0, 0)
     VERDE = (0, 255, 0)
@@ -19,10 +15,7 @@ def executar_quiz():
     AZUL = (0, 0, 255)
     CINZA = (200, 200, 200)
 
-    # Caminho relativo para a imagem de fundo
     caminho_fundo = os.path.join('quiz', 'imgs', 'quiz.png')
-
-    # Carrega a imagem de fundo
     try:
         fundo = pygame.image.load(caminho_fundo)
         fundo = pygame.transform.scale(fundo, (LARGURA, ALTURA))
@@ -30,11 +23,17 @@ def executar_quiz():
         fundo = None
         print(f"Erro ao carregar imagem de fundo: {caminho_fundo}")
 
-    # Fonte
-    fonte = pygame.font.SysFont("Arial", 24)
-    fonte_titulo = pygame.font.SysFont("Arial", 32, bold=True)
+    try:
+        fonte = pygame.font.SysFont("Georgia", 20)
+        fonte_negrito = pygame.font.SysFont("Georgia", 20, bold=True)
+        fonte_titulo = pygame.font.SysFont("Georgia", 24, bold=True)
+        fonte_explicacao = pygame.font.SysFont("Georgia", 18)
+    except:
+        fonte = pygame.font.SysFont("Arial", 20)
+        fonte_negrito = pygame.font.SysFont("Arial", 20, bold=True)
+        fonte_titulo = pygame.font.SysFont("Arial", 24, bold=True)
+        fonte_explicacao = pygame.font.SysFont("Arial", 18)
 
-    # Perguntas e respostas
     perguntas = [
         {
             "pergunta": "1. O que o 'homem do saco' representa no jogo?",
@@ -104,7 +103,6 @@ def executar_quiz():
         }
     ]
 
-    # Variáveis
     pergunta_atual = 0
     resposta_selecionada = None
     feedback = ""
@@ -113,42 +111,66 @@ def executar_quiz():
 
     def desenhar_quiz():
         nonlocal pergunta_atual, resposta_selecionada, feedback, acertos, mostrar_explicacao
-        if fundo:
-            tela.blit(fundo, (0, 0))
-        else:
-            tela.fill(BRANCO)
+        tela.blit(fundo, (0, 0)) if fundo else tela.fill(BRANCO)
 
-        pergunta_texto = fonte.render(perguntas[pergunta_atual]["pergunta"], True, PRETO)
-        tela.blit(pergunta_texto, (50, 100))
+        pygame.draw.rect(tela, CINZA, (650, 10, 130, 50), border_radius=6)
+        pygame.draw.rect(tela, PRETO, (650, 10, 130, 50), 1, border_radius=6)
+        tela.blit(fonte.render(f"{pergunta_atual + 1}/{len(perguntas)}", True, PRETO), (660, 18))
+        tela.blit(fonte.render(f"Acertos: {acertos}", True, PRETO), (660, 38))
 
+        pygame.draw.rect(tela, BRANCO, (30, 70, 740, 80), border_radius=6)
+        pygame.draw.rect(tela, AZUL, (30, 70, 740, 80), 1, border_radius=6)
+
+        # Pergunta
+        palavras = perguntas[pergunta_atual]["pergunta"].split()
+        linhas = []
+        linha = ""
+        for palavra in palavras:
+            teste = (linha + " " + palavra).strip()
+            if fonte_titulo.size(teste)[0] < 700:
+                linha = teste
+            else:
+                linhas.append(linha)
+                linha = palavra
+        linhas.append(linha)
+        for i, l in enumerate(linhas):
+            tela.blit(fonte_titulo.render(l, True, PRETO), (50, 85 + i * 25))
+
+        # Opções
         for i, opcao in enumerate(perguntas[pergunta_atual]["opcoes"]):
-            cor = AZUL if i == resposta_selecionada else PRETO
-            opcao_texto = fonte.render(opcao, True, cor)
-            tela.blit(opcao_texto, (50, 150 + i * 40))
-
+            y = 160 + i * 55
+            cor_borda = AZUL if i == resposta_selecionada else PRETO
+            pygame.draw.rect(tela, BRANCO, (30, y, 740, 45), border_radius=6)
+            pygame.draw.rect(tela, cor_borda, (30, y, 740, 45), 1, border_radius=6)
+            tela.blit(fonte.render(opcao, True, PRETO), (50, y + 12))
             if feedback and i == perguntas[pergunta_atual]["correta"]:
-                pygame.draw.rect(tela, VERDE, (30, 145 + i * 40, 750, 30), 2)
+                pygame.draw.rect(tela, VERDE, (30, y, 740, 45), 2, border_radius=6)
 
+        # Feedback e explicação
         if feedback:
+            pygame.draw.rect(tela, BRANCO, (30, 390, 740, 90), border_radius=6)
             cor_feedback = VERDE if feedback == "Correto!" else VERMELHO
-            feedback_texto = fonte.render(feedback, True, cor_feedback)
-            tela.blit(feedback_texto, (50, 400))
-
+            pygame.draw.rect(tela, cor_feedback, (30, 390, 740, 90), 1, border_radius=6)
+            tela.blit(fonte_negrito.render(feedback, True, cor_feedback), (50, 400))
             if mostrar_explicacao:
-                explicacao_texto = fonte.render(perguntas[pergunta_atual]["explicacao"], True, PRETO)
-                tela.blit(explicacao_texto, (50, 430))
+                explicacao = perguntas[pergunta_atual]["explicacao"]
+                linha = ""
+                y = 430
+                for palavra in explicacao.split():
+                    teste = f"{linha} {palavra}".strip()
+                    if fonte_explicacao.size(teste)[0] < 700:
+                        linha = teste
+                    else:
+                        tela.blit(fonte_explicacao.render(linha, True, PRETO), (50, y))
+                        linha = palavra
+                        y += 20
+                tela.blit(fonte_explicacao.render(linha, True, PRETO), (50, y))
 
-            pygame.draw.rect(tela, CINZA, (300, 500, 200, 50))
-            proximo_texto = fonte.render("Próxima Pergunta", True, PRETO)
-            tela.blit(proximo_texto, (320, 515))
+            # Botão
+            pygame.draw.rect(tela, CINZA, (300, 530, 200, 35), border_radius=6)
+            pygame.draw.rect(tela, PRETO, (300, 530, 200, 35), 1, border_radius=6)
+            tela.blit(fonte.render("Próxima Pergunta", True, PRETO), (320, 540))
 
-        progresso_texto = fonte.render(f"Pergunta {pergunta_atual + 1} de {len(perguntas)}", True, PRETO)
-        tela.blit(progresso_texto, (600, 50))
-
-        acertos_texto = fonte.render(f"Acertos: {acertos}/{len(perguntas)}", True, PRETO)
-        tela.blit(acertos_texto, (600, 80))
-
-    # Loop principal do quiz
     rodando = True
     while rodando:
         for evento in pygame.event.get():
@@ -156,15 +178,16 @@ def executar_quiz():
                 pygame.quit()
                 sys.exit()
 
-            if evento.type == pygame.MOUSEBUTTONDOWN:
+            elif evento.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
 
                 if not feedback:
                     for i in range(4):
-                        if 50 <= x <= 750 and 150 + i * 40 <= y <= 180 + i * 40:
+                        y_opcao = 160 + i * 55
+                        if 30 <= x <= 770 and y_opcao <= y <= y_opcao + 45:
                             resposta_selecionada = i
 
-                if feedback and 300 <= x <= 500 and 500 <= y <= 550:
+                elif 300 <= x <= 500 and 530 <= y <= 565:
                     if pergunta_atual < len(perguntas) - 1:
                         pergunta_atual += 1
                         resposta_selecionada = None
@@ -172,19 +195,22 @@ def executar_quiz():
                         mostrar_explicacao = False
                     else:
                         tela.fill(BRANCO)
-                        resultado_texto = fonte_titulo.render(f"Quiz Concluído! Você acertou {acertos} de {len(perguntas)}", True, PRETO)
-                        tela.blit(resultado_texto, (100, 300))
+                        msg = f"Quiz Concluído! Você acertou {acertos} de {len(perguntas)}"
+                        fim = fonte_titulo.render(msg, True, PRETO)
+                        tela.blit(fim, (LARGURA // 2 - fim.get_width() // 2, ALTURA // 2 - 30))
                         pygame.display.flip()
                         pygame.time.wait(3000)
                         rodando = False
 
-            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_RETURN and resposta_selecionada is not None and not feedback:
-                if resposta_selecionada == perguntas[pergunta_atual]["correta"]:
-                    feedback = "Correto!"
-                    acertos += 1
-                else:
-                    feedback = "Incorreto!"
-                mostrar_explicacao = True
+            elif evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_RETURN and resposta_selecionada is not None and not feedback:
+                    correta = perguntas[pergunta_atual]["correta"]
+                    if resposta_selecionada == correta:
+                        feedback = "Correto!"
+                        acertos += 1
+                    else:
+                        feedback = "Incorreto!"
+                    mostrar_explicacao = True
 
         desenhar_quiz()
-        pygame.display.flip()
+        pygame.display.update()
