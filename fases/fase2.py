@@ -4,7 +4,7 @@ from cenario.rua import Rua
 from personagens.Personagem import Personagem2Modificado
 from cenario.obstaculos import Obstaculo
 from cenario.carro import Carro
-from cenario.coletaveis import Pilula
+from cenario.coletaveis import Pilula, Caderno
 
 def executar(tela, menu=None):
     config = {
@@ -14,7 +14,9 @@ def executar(tela, menu=None):
         "intervalo_pilula": 7000,
         "limite_pilulas_para_inverter": 3,
         "bonus_velocidade_por_pilula": 1,
-        "velocidade_maxima": 8
+        "velocidade_maxima": 8,
+        "velocidade_caderno" : 3,
+        "intervalo_caderno" : 5000
     }
     TEMPO_FASE = 1 * 60
     tempo_inicio = pygame.time.get_ticks()
@@ -51,6 +53,9 @@ def executar(tela, menu=None):
     pilulas = []
     pilula_timer = 0
     vitoria = False
+    caderno_timer = 0
+    cadernos = []
+    
 
     # Grupos de sprites
     grupo_personagens = pygame.sprite.Group(personagem)
@@ -138,6 +143,20 @@ def executar(tela, menu=None):
                         personagem.aplicar_efeito_pilula()
                         
                     pilulas.remove(pilula)
+            
+            caderno_timer += delta_time
+            if caderno_timer > config["intervalo_caderno"]:
+                cadernos.append(Caderno(random.randint(50, 750), -100))
+                caderno_timer = 0
+
+            # Atualiza cadernos e verifica colisões
+            for caderno in cadernos[:]:
+                caderno.atualizar()
+                if caderno.pos_Y > 600:
+                    cadernos.remove(caderno)
+                elif personagem.rect.colliderect(caderno.rect):
+                    pontuacao += 5
+                    cadernos.remove(caderno)
 
             # Sistema do carro
             if rua.visible and carro is None:
@@ -175,6 +194,7 @@ def executar(tela, menu=None):
             grupo_personagens.draw(tela)
             if carro: carro.desenhar(tela)
             for pilula in pilulas: pilula.desenhar(tela)
+            for caderno in cadernos: caderno.desenhar(tela)
 
             # UI
             fonte = pygame.font.SysFont("Arial", 24)
