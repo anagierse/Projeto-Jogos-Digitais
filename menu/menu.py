@@ -16,6 +16,7 @@ class Menu:
         self.estado = "principal"
         self.selecionado = 0
         self.botoes = []
+        self.clock = pygame.time.Clock()
         
         caminho_fundo = os.path.join("menu", "imagens", "fundomenu.png")
         if os.path.exists(caminho_fundo):
@@ -31,7 +32,6 @@ class Menu:
         self.jogador = self.registrar_novo_jogador()
 
     def executar(self):
-        clock = pygame.time.Clock()
         while True:
             self.criar_botoes()
 
@@ -50,7 +50,7 @@ class Menu:
                     elif escolha == "Jogar":
                         self.estado = "fases"
                     elif escolha == "Sobre o Jogo":
-                        self.estado = "sobre"
+                        self.estado = "sobre"  # Corrigido de self.estado para self.estado
                     elif escolha == "Quiz":
                         executar_quiz() 
                     elif escolha == "Voltar":
@@ -62,11 +62,14 @@ class Menu:
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        return "Sair"
+                        if self.estado in ["fases", "sobre", "quiz"]:
+                            self.estado = "principal"
+                        elif self.estado == "principal":
+                            return "Sair"
 
             self.desenhar()
             pygame.display.flip()
-            clock.tick(30)
+            self.clock.tick(30)
 
     def processar_clique(self, pos):
         for texto, rect, opcao in self.botoes:
