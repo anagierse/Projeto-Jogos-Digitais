@@ -18,7 +18,7 @@ def executar(tela, menu=None):
         "perda_maquina": 5
     }
     
-    TEMPO_FASE = 1 * 5
+    TEMPO_FASE = 1 * 60
     tempo_inicio = pygame.time.get_ticks()
     pontos_ja_adicionados = False
     pontuacao = 0
