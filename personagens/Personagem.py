@@ -68,7 +68,6 @@ class Personagem2(PersonagemBase):
         self.lento_timer = 0
 
     def update(self, teclas_pressionadas):
-        # Implementação original do update
         movimento = {
             "esquerda": any(teclas_pressionadas[tecla] for tecla in self.teclas_controle["esquerda"]),
             "direita": any(teclas_pressionadas[tecla] for tecla in self.teclas_controle["direita"]),

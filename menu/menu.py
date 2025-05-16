@@ -11,11 +11,12 @@ class Menu:
         pygame.font.init()
         self.fonte = pygame.font.SysFont("Comic Sans MS", 40)
         self.fonte_pequena = pygame.font.SysFont("Comic Sans MS", 12)
+         # Define opções do menu principal e submenu de fases
         self.opcoes_principal = ["Jogar", "Sobre o Jogo", "Ranking", "Quiz", "Sair"]
         self.opcoes_fases = ["Fase 1", "Fase 2", "Fase 3", "Voltar"]
-        self.estado = "principal"
-        self.selecionado = 0
-        self.botoes = []
+        self.estado = "principal" # Estado atual do menu
+        self.selecionado = 0  # Item atualmente selecionado (para destaque)
+        self.botoes = []   # Lista de botões (texto, retângulo, opção)
         self.clock = pygame.time.Clock()
         
         caminho_fundo = os.path.join("menu", "imagens", "fundomenu.png")
@@ -26,9 +27,11 @@ class Menu:
             self.imagem_fundo = pygame.Surface(tela.get_size())
             self.imagem_fundo.fill((0, 0, 0))
         
+        # Cria uma camada transparente azul
         self.fundo_transparente = pygame.Surface((750, 550), pygame.SRCALPHA)
         self.fundo_transparente.fill((0, 50, 255, 128))
         
+        # Solicita o nome do jogador ao iniciar
         self.jogador = self.registrar_novo_jogador()
 
     def executar(self):
@@ -40,7 +43,7 @@ class Menu:
                     return "Sair"
 
                 if event.type == pygame.MOUSEMOTION:
-                    self.navegar_mouse(event.pos)
+                    self.navegar_mouse(event.pos) # Atualiza seleção com base no mouse
 
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     escolha = self.processar_clique(event.pos)
@@ -50,7 +53,7 @@ class Menu:
                     elif escolha == "Jogar":
                         self.estado = "fases"
                     elif escolha == "Sobre o Jogo":
-                        self.estado = "sobre"  # Corrigido de self.estado para self.estado
+                        self.estado = "sobre"  
                     elif escolha == "Quiz":
                         executar_quiz() 
                     elif escolha == "Voltar":
@@ -82,8 +85,8 @@ class Menu:
         self.botoes = []
 
         if self.estado == "sobre":
-            return
-
+            return  # Não cria botões se estiver na tela de "sobre"
+ 
         opcoes = self.opcoes_fases if self.estado == "fases" else self.opcoes_principal
 
         for i, opcao in enumerate(opcoes):
@@ -101,7 +104,7 @@ class Menu:
 
     def desenhar(self):
         self.tela.blit(self.imagem_fundo, (0, 0))
-
+         # Título "Sobre o Jogo"
         if self.estado == "sobre":
             texto_titulo = self.fonte.render("Sobre o Jogo", True, (255, 255, 0))
             rect_titulo = texto_titulo.get_rect(center=(self.tela.get_width() // 2, 50))
@@ -117,7 +120,7 @@ class Menu:
                 "Adulta:\n"
                 "Apesar de sua superação com as drogas, na fase adulta, um novo vício surgiu para suprir o vazio que sua mãe deixara, o dinheiro, mesmo tendo um trabalho que paga muito bem, rotineiramente o gasta em máquinas de apostas, e até pedir dinheiro com agiotas para poder apostar, fazendo os agiotas cobrarem sua dívida da forma que for necessário."
             )
-
+            # Quebra o texto longo em várias linhas para caber na tela
             wrapper = textwrap.TextWrapper(width=125)
             linhas_quebradas = []
             for paragrafo in texto_longo.split("\n"):
@@ -138,6 +141,7 @@ class Menu:
             self.tela.blit(texto_voltar, rect_voltar)
 
         else:
+        # Desenha botões do menu principal ou de fases
             for i, (texto, rect, opcao) in enumerate(self.botoes):
                 cor = (255, 255, 255) if i != self.selecionado else (255, 255, 0)
                 texto = self.fonte.render(opcao, True, cor)
@@ -146,7 +150,7 @@ class Menu:
     def registrar_novo_jogador(self):
         nome = ""
         registrado = False
-
+         # Loop até o jogador inserir um nome e apertar Enter
         while not registrado:
             for evento in pygame.event.get():
                 if evento.type == pygame.QUIT:
@@ -154,6 +158,7 @@ class Menu:
                     return ""
                 if evento.type == pygame.KEYDOWN:
                     if evento.key == pygame.K_RETURN and nome:
+                        # Salva nome em arquivo de jogador.txt e adiciona ao ranking.txt
                         with open("menu/jogador.txt", "w") as arquivo:
                             arquivo.write(nome)
                         with open("menu/ranking/ranking.txt", "a") as arquivo_ranking:
@@ -163,7 +168,7 @@ class Menu:
                         nome = nome[:-1]
                     else:
                         nome += evento.unicode
-
+            # Interface de digitação do nome
             self.tela.fill((0, 0, 0))
             texto_instrucao = self.fonte.render("Digite seu nome e pressione ENTER:", True, (255, 255, 255))
             texto_nome = self.fonte.render(nome, True, (255, 255, 255))
@@ -175,6 +180,7 @@ class Menu:
 
     def adicionar_pontos(self, pontos):
         try:
+            # Abre ranking e atualiza os pontos do jogador
             with open("menu/ranking/ranking.txt", "r+", encoding="utf-8") as f:
                 linhas = f.readlines()
                 encontrado = False
@@ -192,5 +198,6 @@ class Menu:
                 f.seek(0)
                 f.writelines(linhas)
         except FileNotFoundError:
+            # Cria arquivo se ele não existir
             with open("menu/ranking/ranking.txt", "w", encoding="utf-8") as f:
                 f.write(f"{self.jogador},{pontos}\n")

@@ -2,6 +2,7 @@ import pygame
 import sys
 import os
 
+# Função principal que executa o quiz
 def executar_quiz():
     pygame.init()
     LARGURA, ALTURA = 800, 600
@@ -14,7 +15,7 @@ def executar_quiz():
     VERMELHO = (255, 0, 0)
     AZUL = (0, 0, 255)
     CINZA = (200, 200, 200)
-
+    # Tentativa de carregar imagem de fundo
     caminho_fundo = os.path.join('quiz', 'imgs', 'quiz.png')
     try:
         fundo = pygame.image.load(caminho_fundo)
@@ -22,7 +23,7 @@ def executar_quiz():
     except:
         fundo = None
         print(f"Erro ao carregar imagem de fundo: {caminho_fundo}")
-
+    # Tentativa de carregar fontes; se falhar, usa fontes padrão
     try:
         fonte = pygame.font.SysFont("Georgia", 20)
         fonte_negrito = pygame.font.SysFont("Georgia", 20, bold=True)
@@ -33,7 +34,8 @@ def executar_quiz():
         fonte_negrito = pygame.font.SysFont("Arial", 20, bold=True)
         fonte_titulo = pygame.font.SysFont("Arial", 24, bold=True)
         fonte_explicacao = pygame.font.SysFont("Arial", 18)
-
+    
+    # Lista de perguntas, alternativas e explicações
     perguntas = [
         {
             "pergunta": "1. O que o 'homem do saco' representa no jogo?",
@@ -102,26 +104,28 @@ def executar_quiz():
             "explicacao": "As fases representam as diferentes etapas da vida, cada uma com seus desafios sociais reais."
         }
     ]
-
+    # Variáveis de controle do quiz
     pergunta_atual = 0
     resposta_selecionada = None
     feedback = ""
     acertos = 0
     mostrar_explicacao = False
-
+    # Função que desenha a interface do quiz na tela
     def desenhar_quiz():
         nonlocal pergunta_atual, resposta_selecionada, feedback, acertos, mostrar_explicacao
         tela.blit(fundo, (0, 0)) if fundo else tela.fill(BRANCO)
-
+       
+        # Barra superior com número da pergunta e acertos
         pygame.draw.rect(tela, CINZA, (650, 10, 130, 50), border_radius=6)
         pygame.draw.rect(tela, PRETO, (650, 10, 130, 50), 1, border_radius=6)
         tela.blit(fonte.render(f"{pergunta_atual + 1}/{len(perguntas)}", True, PRETO), (660, 18))
         tela.blit(fonte.render(f"Acertos: {acertos}", True, PRETO), (660, 38))
 
+        # Caixa da pergunta
         pygame.draw.rect(tela, BRANCO, (30, 70, 740, 80), border_radius=6)
         pygame.draw.rect(tela, AZUL, (30, 70, 740, 80), 1, border_radius=6)
 
-        # Pergunta
+        # Quebra a pergunta em múltiplas linhas se for longa
         palavras = perguntas[pergunta_atual]["pergunta"].split()
         linhas = []
         linha = ""
@@ -136,17 +140,18 @@ def executar_quiz():
         for i, l in enumerate(linhas):
             tela.blit(fonte_titulo.render(l, True, PRETO), (50, 85 + i * 25))
 
-        # Opções
+        # Renderiza as opções
         for i, opcao in enumerate(perguntas[pergunta_atual]["opcoes"]):
             y = 160 + i * 55
             cor_borda = AZUL if i == resposta_selecionada else PRETO
             pygame.draw.rect(tela, BRANCO, (30, y, 740, 45), border_radius=6)
             pygame.draw.rect(tela, cor_borda, (30, y, 740, 45), 1, border_radius=6)
             tela.blit(fonte.render(opcao, True, PRETO), (50, y + 12))
+            # Se a resposta estiver correta e o feedback foi dado, destaca em verde
             if feedback and i == perguntas[pergunta_atual]["correta"]:
                 pygame.draw.rect(tela, VERDE, (30, y, 740, 45), 2, border_radius=6)
 
-        # Feedback e explicação
+        # Mostra o feedback e explicação se houver
         if feedback:
             pygame.draw.rect(tela, BRANCO, (30, 390, 740, 90), border_radius=6)
             cor_feedback = VERDE if feedback == "Correto!" else VERMELHO
@@ -166,11 +171,11 @@ def executar_quiz():
                         y += 20
                 tela.blit(fonte_explicacao.render(linha, True, PRETO), (50, y))
 
-            # Botão
+            # Botão para próxima pergunta
             pygame.draw.rect(tela, CINZA, (300, 530, 200, 35), border_radius=6)
             pygame.draw.rect(tela, PRETO, (300, 530, 200, 35), 1, border_radius=6)
             tela.blit(fonte.render("Próxima Pergunta", True, PRETO), (320, 540))
-
+     # Loop principal do quiz
     rodando = True
     while rodando:
         for evento in pygame.event.get():
@@ -181,12 +186,14 @@ def executar_quiz():
             elif evento.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
 
+                # Seleciona uma resposta se ainda não respondeu
                 if not feedback:
                     for i in range(4):
                         y_opcao = 160 + i * 55
                         if 30 <= x <= 770 and y_opcao <= y <= y_opcao + 45:
                             resposta_selecionada = i
-
+                
+                # Avança para próxima pergunta
                 elif 300 <= x <= 500 and 530 <= y <= 565:
                     if pergunta_atual < len(perguntas) - 1:
                         pergunta_atual += 1
@@ -194,6 +201,7 @@ def executar_quiz():
                         feedback = ""
                         mostrar_explicacao = False
                     else:
+                        # Fim do quiz
                         tela.fill(BRANCO)
                         msg = f"Quiz Concluído! Você acertou {acertos} de {len(perguntas)}"
                         fim = fonte_titulo.render(msg, True, PRETO)
@@ -203,6 +211,7 @@ def executar_quiz():
                         rodando = False
 
             elif evento.type == pygame.KEYDOWN:
+                # Verifica se ENTER foi pressionado para validar resposta
                 if evento.key == pygame.K_RETURN and resposta_selecionada is not None and not feedback:
                     correta = perguntas[pergunta_atual]["correta"]
                     if resposta_selecionada == correta:
